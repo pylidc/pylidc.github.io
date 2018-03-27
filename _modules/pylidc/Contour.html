@@ -1,0 +1,176 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pylidc.Contour &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pylidc  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pylidc.Contour</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sqlalchemy</span> <span class="k">as</span> <span class="nn">sq</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="k">import</span> <span class="n">relationship</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">._Base</span> <span class="k">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">.Scan</span> <span class="k">import</span> <span class="n">Scan</span>
+<span class="kn">from</span> <span class="nn">.Annotation</span> <span class="k">import</span> <span class="n">Annotation</span>
+
+<span class="n">_off_limits</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;annotation_id&#39;</span><span class="p">,</span><span class="s1">&#39;annotation&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;inclusion&#39;</span><span class="p">,</span><span class="s1">&#39;image_z_position&#39;</span><span class="p">,</span><span class="s1">&#39;dicom_file_name&#39;</span><span class="p">,</span><span class="s1">&#39;coords&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Contour"><a class="viewcode-back" href="../../contour.html#pylidc.Contour">[docs]</a><span class="k">class</span> <span class="nc">Contour</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Contour class holds the coordinate data for the vertices of</span>
+<span class="sd">    a :class:`pylidc.Annotation` object for a single slice in the CT volume.</span>
+
+<span class="sd">    inclusion: bool</span>
+<span class="sd">        If True, the area inside the contour is included as part of </span>
+<span class="sd">        the nodule. If False, the area inside the contour is excluded </span>
+<span class="sd">        from the nodule.</span>
+
+<span class="sd">    image_z_position: float</span>
+<span class="sd">        This is the `imageZposition` defined via the xml annnotations </span>
+<span class="sd">        for this contour. It is the z-coordinate of dicom </span>
+<span class="sd">        attribute, `(0020,0032)`.</span>
+<span class="sd">    </span>
+<span class="sd">    dicom_file_name: string</span>
+<span class="sd">        This is the name of the corresponding dicom file for the scan </span>
+<span class="sd">        to which this contour belongs, having the same `image_z_position`.</span>
+
+<span class="sd">    coords: string</span>
+<span class="sd">        These are the sequential (x,y) coordinates of the curve, stored </span>
+<span class="sd">        as a string. It is better to access these coordinates using the </span>
+<span class="sd">        `to_matrix` method, which returns a numpy array rather than </span>
+<span class="sd">        a string.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; import pylidc as pl</span>
+<span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; ann = pl.query(pl.Annotation).first()</span>
+<span class="sd">        &gt;&gt;&gt; vol = ann.scan.to_volume()</span>
+<span class="sd">        &gt;&gt;&gt; ii,jj = ann.contours[0].to_matrix(include_k=False).T</span>
+<span class="sd">        &gt;&gt;&gt; </span>
+<span class="sd">        &gt;&gt;&gt; plt.imshow(vol[:,:,46], cmap=plt.cm.gray)</span>
+<span class="sd">        &gt;&gt;&gt; plt.plot(jj, ii, &#39;-r&#39;, lw=1, label=&quot;Nodule Boundary&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; plt.legend()</span>
+<span class="sd">        &gt;&gt;&gt; plt.show()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__tablename__</span>    <span class="o">=</span> <span class="s1">&#39;contours&#39;</span>
+    <span class="nb">id</span>               <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">annotation_id</span>    <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;annotations.id&#39;</span><span class="p">))</span>
+    <span class="n">annotation</span>       <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;Annotation&#39;</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s1">&#39;contours&#39;</span><span class="p">)</span>
+    <span class="n">inclusion</span>        <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;inclusion&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">Boolean</span><span class="p">)</span>
+    <span class="n">image_z_position</span> <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;image_z_position&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">dicom_file_name</span>  <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;dicom_file_name&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">String</span><span class="p">)</span>
+    <span class="n">coords</span>           <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;coords&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">String</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Contour(id=</span><span class="si">%d</span><span class="s2">,annotation_id=</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_off_limits</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Trying to assign read-only Contour object attribute </span><span class="se">\</span>
+<span class="s2">                   `</span><span class="si">%s</span><span class="s2">` a value of `</span><span class="si">%s</span><span class="s2">`.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Contour</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Contour.to_matrix"><a class="viewcode-back" href="../../contour.html#pylidc.Contour.to_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">to_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_k</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the contour-annotation coordinates as a matrix where </span>
+<span class="sd">        each row contains an (i,j,k) *index* coordinate into the image volume.</span>
+<span class="sd">        </span>
+<span class="sd">        include_k: bool, default=True</span>
+<span class="sd">            Set `include_k=False` to omit the `k` axis coordinate. In this </span>
+<span class="sd">            case, each row of the returned matrix is an (i,j) *index* </span>
+<span class="sd">            coordinate into the `k`th image. The index `k` can be </span>
+<span class="sd">            recovered via:</span>
+<span class="sd">                z = contour.image_z_position</span>
+<span class="sd">                k = contour.annotation.contour_slice_indexes[z]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The reversal [::-1] is because the coordinates from the LIDC XML</span>
+        <span class="c1"># are stored as (x,y), not (i,j).</span>
+        <span class="n">ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">int</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span> <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">include_k</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ij</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ij</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">zs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">contour_slice_zvals</span>
+            <span class="n">kk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zs</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">image_z_position</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+            <span class="n">k</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">contour_slice_indices</span><span class="p">[</span><span class="n">kk</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">ij</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span></div></div>
+    
+<span class="n">Annotation</span><span class="o">.</span><span class="n">contours</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;Contour&#39;</span><span class="p">,</span>
+                                   <span class="n">order_by</span><span class="o">=</span><span class="n">Contour</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                   <span class="n">back_populates</span><span class="o">=</span><span class="s1">&#39;annotation&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pylidc  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Matt Hancock.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

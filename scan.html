@@ -1,0 +1,366 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>The Scan Model &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Annotation Model" href="annotation.html" />
+    <link rel="prev" title="pylidc" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="annotation.html" title="The Annotation Model"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="pylidc"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">pylidc</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="annotation.html"
+                        title="next chapter">The Annotation Model</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-scan-model">
+<h1>The Scan Model<a class="headerlink" href="#the-scan-model" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pylidc.Scan">
+<em class="property">class </em><code class="descclassname">pylidc.</code><code class="descname">Scan</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Scan.html#Scan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Scan" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Scan model class refers to the top-level XML file from the LIDC.
+A scan has many <a class="reference internal" href="annotation.html#pylidc.Annotation" title="pylidc.Annotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">pylidc.Annotation</span></code></a> objects, which correspond
+to the <cite>unblindedReadNodule</cite> XML attributes for the scan.</p>
+<dl class="attribute">
+<dt id="pylidc.Scan.study_instance_uid">
+<code class="descname">study_instance_uid</code><a class="headerlink" href="#pylidc.Scan.study_instance_uid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.series_instance_uid">
+<code class="descname">series_instance_uid</code><a class="headerlink" href="#pylidc.Scan.series_instance_uid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.patient_id">
+<code class="descname">patient_id</code><a class="headerlink" href="#pylidc.Scan.patient_id" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> – Identifier of the from <cite>LIDC-IDRI-####</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.slice_thickness">
+<code class="descname">slice_thickness</code><a class="headerlink" href="#pylidc.Scan.slice_thickness" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> – DICOM attribute, <cite>(0018,0050)</cite>. Note that this may not be
+equal to the <cite>slice_spacing</cite> attribute (see below).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.slice_zvals">
+<code class="descname">slice_zvals</code><a class="headerlink" href="#pylidc.Scan.slice_zvals" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>ndarray</em> – The “z-values” for the slices of the scan (i.e.,
+the last coordinate of the ImagePositionPatient DICOM attribute)
+as a NumPy array sorted in increasing order.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.slice_spacing">
+<code class="descname">slice_spacing</code><a class="headerlink" href="#pylidc.Scan.slice_spacing" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> – This computes the median of the difference
+between the slice coordinates, i.e., <cite>scan.slice_zvals</cite>.
+NOTE: that this attribute is typically (but not always!) the
+same as the <cite>slice_thickness</cite> attribute. Furthermore,
+the <cite>slice_spacing</cite> does NOT necessarily imply that all the
+slices are spaced with spacing (although they often are).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.pixel_spacing">
+<code class="descname">pixel_spacing</code><a class="headerlink" href="#pylidc.Scan.pixel_spacing" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> – Dicom attribute, <cite>(0028,0030)</cite>. This is normally two
+values. All scans in the LIDC have equal resolutions
+in the transverse plane, so only one value is taken here.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.contrast_used">
+<code class="descname">contrast_used</code><a class="headerlink" href="#pylidc.Scan.contrast_used" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – If the DICOM file for the scan had any Contrast tag,
+this is marked as <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.is_from_initial">
+<code class="descname">is_from_initial</code><a class="headerlink" href="#pylidc.Scan.is_from_initial" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Indicates whether or not this PatientID was tagged as
+part of the initial 399 release.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.sorted_dicom_file_names">
+<code class="descname">sorted_dicom_file_names</code><a class="headerlink" href="#pylidc.Scan.sorted_dicom_file_names" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> – This attribute is no longer used, but left for historical
+reasons. This is a string containing a comma-separated list
+like <cite>[number].dcm</cite>. It is a list of the dicom file
+names for this scan in order of increasing z-coordinate
+of dicom attribute, <cite>(0020,0032)</cite>. In rare cases where
+a scan includes multiple files with the same z-coordinate,
+the one with the lesser <cite>InstanceNumber</cite> is used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Scan.Example">
+<code class="descname">Example</code><a class="headerlink" href="#pylidc.Scan.Example" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qu</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">slice_thickness</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">qu</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; 97</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span> <span class="o">=</span> <span class="n">qu</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">scan</span><span class="o">.</span><span class="n">patient_id</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">slice_thickness</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; LIDC-IDRI-0066, 0.63671875, 0.6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scan</span><span class="o">.</span><span class="n">annotations</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; 11</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pylidc.Scan.cluster_annotations">
+<code class="descname">cluster_annotations</code><span class="sig-paren">(</span><em>metric='min'</em>, <em>tol=None</em>, <em>factor=0.9</em>, <em>return_distance_matrix=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Scan.html#Scan.cluster_annotations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Scan.cluster_annotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate which annotations refer to the same physical
+nodule. This method clusters all nodule Annotations for a
+Scan by computing a distance measure between the annotations.</p>
+<dl class="docutils">
+<dt>metric: string or callable, default ‘min’</dt>
+<dd><dl class="first docutils">
+<dt>If string, see</dt>
+<dd><cite>from pylidc.annotation_distance_metrics import metrics</cite>
+<cite>metrics.keys()</cite></dd>
+</dl>
+<p class="last">for available metrics. If callable, the provided function,
+should take two Annotation objects and return a float, i.e.,
+metric(ann1, ann2).</p>
+</dd>
+<dt>tol: float, default None</dt>
+<dd>A distance in millimeters. Annotations are grouped when
+the minimum distance between their boundary contour points
+is less than <cite>tol</cite>. The default, None, sets
+<cite>tol = scan.pixel_spacing</cite>. More detail on this is found below.</dd>
+<dt>factor: float, default=0.9</dt>
+<dd>If <cite>tol</cite> resulted in any group of nodules with more than
+4 Annotations, then <cite>tol</cite> is multiplied by <cite>factor</cite> and the
+grouping is performed again.</dd>
+<dt>return_distance_matrix: bool, default False</dt>
+<dd>Optionally return the distance matrix that was used
+to produce the clusters.</dd>
+<dt>verbose: bool, default True</dt>
+<dd>If <cite>tol</cite> is reduced below 1e-1, then we conclude that
+the nodule groups cannot be automatically reduced to have
+groups with number of Annotations &lt;= 4, and a warning message
+is printed. If verbose=False, this message is not printed.</dd>
+<dt>returns: clusters, a list of lists.</dt>
+<dd><p class="first"><cite>clusters[j]</cite> is a list of Annotation objects deemed
+to refer to the same physical nodule in the Scan.</p>
+<p class="last"><cite>len(clusters)</cite> attempts to estimate (via the specified <cite>tol</cite>)
+the number of unique physical nodules present in this Scan as
+determined by this overlap method and the tolerance used.</p>
+</dd>
+</dl>
+<p>More on the <cite>tol</cite> parameter and distance measures:</p>
+<p>The “distance” matrix, <cite>d[i,j]</cite>, between all Annotations for
+the Scan is first computed using the provided <cite>metric</cite> parameter.</p>
+<p>Annotations are “grouped” or estimated to refer to the same physical
+nodule when <cite>d &lt;= tol</cite>. The groupings are formed by determining
+the adjacency matrix for the Annotations. Annotations are said to be
+adjacent when <cite>d[i,j] &lt;= tol</cite>. Groups are determined by finding
+the connected components of the graph associated with
+this adjacency matrix.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+
+<span class="n">scan</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">nodules</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">cluster_annotations</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This can has </span><span class="si">%d</span><span class="s2"> nodules.&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodules</span><span class="p">))</span>
+<span class="c1"># =&gt; This can has 4 nodules.</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">nod</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nodules</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nodule </span><span class="si">%d</span><span class="s2"> has </span><span class="si">%d</span><span class="s2"> annotations.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">nod</span><span class="p">)))</span>
+<span class="c1"># =&gt; Nodule 1 has 4 annotations.</span>
+<span class="c1"># =&gt; Nodule 2 has 4 annotations.</span>
+<span class="c1"># =&gt; Nodule 3 has 1 annotations.</span>
+<span class="c1"># =&gt; Nodule 4 has 4 annotations.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pylidc.Scan.get_path_to_dicom_files">
+<code class="descname">get_path_to_dicom_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Scan.html#Scan.get_path_to_dicom_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Scan.get_path_to_dicom_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the path to where the DICOM files are stored for this scan,
+relative to the root path set in the pylidc configuration file (e.g.,
+<cite>~/.pylidc</cite> in MAC and Linux).</p>
+<p><em>This path is tricky and would benefit from coordination with TCIA.</em></p>
+<p>1.) In older downloads, the data DICOM data would download as:</p>
+<blockquote>
+<div><p>[…]/LIDC-IDRI/LIDC-IDRI-####/scan_instance_uid/series_instance_uid/<a href="#id1"><span class="problematic" id="id2">*</span></a>.dcm</p>
+<p>For example,</p>
+<p>/data/storage/path/LIDC-IDRI/LIDC-IDRI-0078/1.3.6.1.4.1.14519.5.2.1.6279.6001.339170810277323131167631068432/1.3.6.1.4.1.14519.5.2.1.6279.6001.303494235102183795724852353824</p>
+</div></blockquote>
+<p>2.) However, in more recent downloads, the data is downloaded like:</p>
+<blockquote>
+<div>[…]/LIDC-IDRI/LIDC-IDRI-####/??????</div></blockquote>
+<p>We first check 1.) and hope that it works. Otherwise, we check if the
+<cite>LIDC-IDRI-#### folder exists in the root path. If so, then we
+recursively search the `LIDC-IDRI-####</cite> directory until we find
+the correct subfolder that contains a DICOM file with the correct
+<cite>study_instance_uid</cite> and <cite>series_instance_uid</cite>.</p>
+<p>Note that 2.) is much less efficient that 1.); however, 2.) is very
+robust.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">scan</span><span class="o">.</span><span class="n">get_path_to_dicom_files</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; /data/storage/path/LIDC-IDRI/LIDC-IDRI-0078/1.3.6.1.4.1.14519.5.2.1.6279.6001.339170810277323131167631068432/1.3.6.1.4.1.14519.5.2.1.6279.6001.303494235102183795724852353824</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pylidc.Scan.load_all_dicom_images">
+<code class="descname">load_all_dicom_images</code><span class="sig-paren">(</span><em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Scan.html#Scan.load_all_dicom_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Scan.load_all_dicom_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load all the DICOM images assocated with this scan and return as list.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">scan</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+<span class="n">images</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">load_all_dicom_images</span><span class="p">()</span>
+<span class="n">zs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">ImagePositionPatient</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">zs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">img</span><span class="o">.</span><span class="n">SliceThickness</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">slice_thickness</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span> <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pixel_array</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span> <span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">slice_spacing</code></dt>
+<dd><p>This computes the median of the difference
+between the slice coordinates, i.e., <cite>scan.slice_zvals</cite>.</p>
+<p>NOTE: that this attribute is typically (but not always!) the
+same as the <cite>slice_thickness</cite> attribute. Furthermore,
+the <cite>slice_spacing</cite> does NOT necessarily imply that all the
+slices are spaced with spacing (although they often are).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">slice_zvals</code></dt>
+<dd><p>The “z-values” for the slices of the scan (i.e.,
+the last coordinate of the ImagePositionPatient DICOM attribute)
+as a NumPy array sorted in increasing order.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pylidc.Scan.to_volume">
+<code class="descname">to_volume</code><span class="sig-paren">(</span><em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Scan.html#Scan.to_volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Scan.to_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the scan as a 3D numpy array volume.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pylidc.Scan.visualize">
+<code class="descname">visualize</code><span class="sig-paren">(</span><em>annotation_groups=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Scan.html#Scan.visualize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Scan.visualize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize the scan.</p>
+<dl class="docutils">
+<dt>annotation_groups: list of lists of Annotation objects</dt>
+<dd>This argument should be supplied by the returned object from
+the <cite>cluster_annotations</cite> method.</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+
+<span class="n">scan</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">nodules</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">cluster_annotations</span><span class="p">()</span>
+
+<span class="n">scan</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">annotation_groups</span><span class="o">=</span><span class="n">nodules</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="annotation.html" title="The Annotation Model"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="pylidc"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Matt Hancock.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

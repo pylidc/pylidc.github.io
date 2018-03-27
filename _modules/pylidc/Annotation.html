@@ -1,0 +1,1285 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pylidc.Annotation &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pylidc  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pylidc.Annotation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">sqlalchemy</span> <span class="k">as</span> <span class="nn">sq</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="k">import</span> <span class="n">relationship</span>
+<span class="kn">from</span> <span class="nn">._Base</span> <span class="k">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">.Scan</span> <span class="k">import</span> <span class="n">Scan</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># For contour to boolean mask function.</span>
+<span class="kn">import</span> <span class="nn">matplotlib.path</span> <span class="k">as</span> <span class="nn">mplpath</span>
+
+<span class="c1"># For CT volume visualizer.</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="k">import</span> <span class="n">Rectangle</span>
+<span class="kn">from</span> <span class="nn">matplotlib.widgets</span> <span class="k">import</span> <span class="n">Slider</span><span class="p">,</span> <span class="n">Button</span><span class="p">,</span> <span class="n">CheckButtons</span>
+
+<span class="c1"># For diameter estimation.</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="k">import</span> <span class="n">pdist</span><span class="p">,</span><span class="n">squareform</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">RegularGridInterpolator</span>
+
+<span class="c1"># For 3D visualizer.</span>
+<span class="kn">from</span> <span class="nn">skimage.measure</span> <span class="k">import</span> <span class="n">marching_cubes</span><span class="p">,</span> <span class="n">mesh_surface_area</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="k">import</span> <span class="n">Axes3D</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d.art3d</span> <span class="k">import</span> <span class="n">Poly3DCollection</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="k">import</span> <span class="n">Delaunay</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage.morphology</span> <span class="k">import</span> <span class="n">distance_transform_edt</span> <span class="k">as</span> <span class="n">dtrans</span>
+
+
+<span class="n">feature_names</span> <span class="o">=</span> \
+   <span class="p">(</span><span class="s1">&#39;subtlety&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;internalStructure&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;calcification&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;margin&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;lobulation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;spiculation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;texture&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;malignancy&#39;</span><span class="p">)</span>
+
+<span class="n">_off_limits</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;scan_id&#39;</span><span class="p">,</span><span class="s1">&#39;_nodule_id&#39;</span><span class="p">,</span><span class="s1">&#39;scan&#39;</span><span class="p">]</span> <span class="o">+</span> \
+              <span class="nb">list</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
+
+<span class="n">viz3dbackends</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;matplotlib&#39;</span><span class="p">,</span> <span class="s1">&#39;mayavi&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Annotation"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation">[docs]</a><span class="k">class</span> <span class="nc">Annotation</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Nodule model class holds the information from a single physicians </span>
+<span class="sd">    annotation of a nodule &gt;= 3mm class with a particular scan. A nodule </span>
+<span class="sd">    has many contours, each of which refers to the contour drawn for </span>
+<span class="sd">    nodule in each scan slice.  </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subtlety: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    internalStructure: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    calcification: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    sphericity: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    margin: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    lobulation: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    spiculation: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    texture: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    malignancy: int</span>
+<span class="sd">        blah</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    ---------</span>
+<span class="sd">    ::</span>
+<span class="sd">        import pylidc as pl</span>
+<span class="sd">        # Get the first annotation with spiculation value greater than 3.</span>
+<span class="sd">        ann = pl.query(pl.Annotation).filter(pl.Annotation.spiculation &gt; 3).first()</span>
+<span class="sd">        </span>
+<span class="sd">        print(ann.spiculation)</span>
+<span class="sd">        # =&gt; 4</span>
+<span class="sd">        </span>
+<span class="sd">        # Each nodule feature has a corresponding property </span>
+<span class="sd">        # to print the semantic value.</span>
+<span class="sd">        print(ann.Spiculation)</span>
+<span class="sd">        # =&gt; Medium-High Spiculation</span>
+<span class="sd">        </span>
+<span class="sd">        q = pl.query(pl.Annotation).join(pl.Scan)</span>
+<span class="sd">        q = q.filter(pl.Scan.slice_thickness &lt;= 1,</span>
+<span class="sd">                     pl.Annotation.malignancy == 5)</span>
+<span class="sd">        print(q.count())</span>
+<span class="sd">        # =&gt; 58</span>
+<span class="sd">        </span>
+<span class="sd">        ann = q.first()</span>
+<span class="sd">        print(&quot;%.2f, %.2f, %.2f&quot; % (ann.diameter, ann.surface_area, ann.volume))</span>
+<span class="sd">        # =&gt; 17.98, 1221.40, 1033.70</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;annotations&#39;</span>
+    <span class="nb">id</span>            <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">scan_id</span>       <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;scans.id&#39;</span><span class="p">))</span>
+    <span class="n">scan</span>          <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;Scan&#39;</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s1">&#39;annotations&#39;</span><span class="p">)</span>
+    <span class="n">_nodule_id</span>    <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;_nodule_id&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">String</span><span class="p">)</span>
+
+    <span class="c1"># Physician-assigned diagnostic attributes.</span>
+    <span class="n">subtlety</span>          <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;subtlety&#39;</span><span class="p">,</span>          <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">internalStructure</span> <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;internalStructure&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">calcification</span>     <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;calcification&#39;</span><span class="p">,</span>     <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">sphericity</span>        <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;sphericity&#39;</span><span class="p">,</span>        <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">margin</span>            <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;margin&#39;</span><span class="p">,</span>            <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">lobulation</span>        <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;lobulation&#39;</span><span class="p">,</span>        <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">spiculation</span>       <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;spiculation&#39;</span><span class="p">,</span>       <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">texture</span>           <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;texture&#39;</span><span class="p">,</span>           <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">malignancy</span>        <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;malignancy&#39;</span><span class="p">,</span>        <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Annotation(id=</span><span class="si">%d</span><span class="s2">,scan_id=</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan_id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_off_limits</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Trying to assign read-only Annotation object attribute </span><span class="se">\</span>
+<span class="s2">                   `</span><span class="si">%s</span><span class="s2">` a value of `</span><span class="si">%s</span><span class="s2">`.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Annotation</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c1">####################################</span>
+    <span class="c1"># { Begin semantic attribute functions</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Subtlety</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return subtlety value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtlety</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="s2">&quot;Subtlety score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Extremely Subtle&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Moderately Subtle&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Fairly Subtle&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Moderately Obvious&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Obvious&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">InternalStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return internalStructure value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">internalStructure</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="s2">&quot;Internal structure score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Soft Tissue&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Fluid&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Fat&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Air&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Calcification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return calcification value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calcification</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">7</span><span class="p">),</span> <span class="s2">&quot;Calcification score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Popcorn&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Laminated&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Solid&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Non-central&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Central&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Absent&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Sphericity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return sphericity value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sphericity</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="s2">&quot;Sphericity score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Linear&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Ovoid/Linear&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Ovoid&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Ovoid/Round&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Round&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Margin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return margin value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">margin</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="s2">&quot;Margin score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Poorly Defined&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Near Poorly Defined&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Medium Margin&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Near Sharp&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Sharp&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Lobulation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return lobulation value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobulation</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="s2">&quot;Lobulation score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;No Lobulation&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Nearly No Lobulation&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Medium Lobulation&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Near Marked Lobulation&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Marked Lobulation&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Spiculation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return spiculation value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spiculation</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="s2">&quot;Spiculation score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;No Spiculation&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Nearly No Spiculation&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Medium Spiculation&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Near Marked Spiculation&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Marked Spiculation&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Texture</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return texture value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">texture</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="s2">&quot;Texture score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Non-Solid/GGO&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Non-Solid/Mixed&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Part Solid/Mixed&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Solid/Mixed&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Solid&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Malignancy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return malignancy value as string&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">malignancy</span>
+        <span class="k">assert</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="s2">&quot;Malignancy score out of bounds.&quot;</span>
+        <span class="k">if</span>   <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Highly Unlikely&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Moderately Unlikely&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Indeterminate&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Moderately Suspicious&#39;</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Highly Suspicious&#39;</span>
+
+
+    <span class="c1"># } End attribute functions</span>
+    <span class="c1">####################################</span>
+
+<div class="viewcode-block" id="Annotation.feature_vals"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.feature_vals">[docs]</a>    <span class="k">def</span> <span class="nf">feature_vals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_str</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return all feature values as a numpy array in the order </span>
+<span class="sd">        presented in `feature_names`.</span>
+
+<span class="sd">        return_str: bool, default False</span>
+<span class="sd">            If True, a list of strings is also returned, corresponding</span>
+<span class="sd">            to the meaning of each numerical feature value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">return_str</span><span class="p">:</span>
+            <span class="n">caps</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">]</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">caps</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Internalstructure&#39;</span><span class="p">)</span>
+            <span class="n">caps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;InternalStructure&#39;</span>
+            <span class="k">return</span> <span class="n">fvals</span><span class="p">,</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">caps</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fvals</span></div>
+
+<div class="viewcode-block" id="Annotation.print_formatted_feature_table"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.print_formatted_feature_table">[docs]</a>    <span class="k">def</span> <span class="nf">print_formatted_feature_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return all feature values as a string table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fnames</span> <span class="o">=</span> <span class="n">feature_names</span>
+        <span class="n">fvals</span><span class="p">,</span> <span class="n">fstrings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_vals</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-18s</span><span class="s1">   </span><span class="si">%-24s</span><span class="s1">   </span><span class="si">%-2s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="s1">&#39;Feature&#39;</span><span class="p">,</span> <span class="s1">&#39;Meaning&#39;</span><span class="p">,</span><span class="s1">&#39;#&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-18s</span><span class="s1">   </span><span class="si">%-24s</span><span class="s1">   </span><span class="si">%-2s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fnames</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-18s</span><span class="s1"> | </span><span class="si">%-24s</span><span class="s1"> | </span><span class="si">%-2d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">fnames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span> 
+                                          <span class="n">fstrings</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fvals</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="Annotation.bbox"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.bbox">[docs]</a>    <span class="k">def</span> <span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a tuple of Python `slice` objects that can be used to index</span>
+<span class="sd">        into the image volume corresponding to the extent of the</span>
+<span class="sd">        (padded) bounding box.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        pad: int, list of ints, or float, default=None</span>
+<span class="sd">            * If None (default), then no padding is used.</span>
+<span class="sd">            * If an integer is provided, then the slices are padded</span>
+<span class="sd">              uniformly by this integer amount.</span>
+<span class="sd">            * If a list of integers is provided, then it is of the form</span>
+<span class="sd">                  `[(i1,i2), (j1,j2), (k1,k2)]` </span>
+<span class="sd">              and indicates the pad amounts along each coordinate axis.</span>
+<span class="sd">            * If a float is provided, then the slices are padded such</span>
+<span class="sd">              that the bounding box occupies at least `pad` physical units</span>
+<span class="sd">              (using the corresponding scan `pixel_spacing` and `slice_spacing`</span>
+<span class="sd">              parameters). This means the returned Slice indices will</span>
+<span class="sd">              yield a bounding box that is at least `pad` millimeters along</span>
+<span class="sd">              each coordinate axis direction.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        In the various `pad` cases above, borders are handled so that if a </span>
+<span class="sd">        pad beyond the image borders is requested, then it is set </span>
+<span class="sd">        to the maximum (or minimum, depending on the direction)</span>
+<span class="sd">        possible index.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        The example below illustrates the various `pad` argument types::</span>
+
+<span class="sd">            import pylidc as pl</span>
+<span class="sd">            </span>
+<span class="sd">            ann = pl.query(pl.Annotation).first()</span>
+<span class="sd">            vol = ann.scan.to_volume()</span>
+<span class="sd">            </span>
+<span class="sd">            print ann.bbox()</span>
+<span class="sd">            # =&gt; (slice(151, 185, None), slice(349, 376, None), slice(44, 50, None))</span>
+<span class="sd">            </span>
+<span class="sd">            print(vol[ann.bbox()].shape)</span>
+<span class="sd">            # =&gt; (34, 27, 6)</span>
+<span class="sd">            </span>
+<span class="sd">            print(vol[ann.bbox(pad=2)].shape)</span>
+<span class="sd">            # =&gt; (38, 31, 10)</span>
+<span class="sd">            </span>
+<span class="sd">            print(vol[ann.bbox(pad=[(1,2), (3,0), (2,4)])].shape)</span>
+<span class="sd">            # =&gt; (37, 30, 12)</span>
+<span class="sd">            </span>
+<span class="sd">            print(max(ann.bbox_dims()))</span>
+<span class="sd">            # =&gt; 21.45</span>
+<span class="sd">            </span>
+<span class="sd">            print(vol[ann.bbox(pad=30.0)].shape)</span>
+<span class="sd">            # =&gt; (48, 49, 12)</span>
+<span class="sd">            </span>
+<span class="sd">            print(ann.bbox_dims(pad=30.0))</span>
+<span class="sd">            # =&gt; [30.55, 31.200000000000003, 33.0]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Error checking ...</span>
+        <span class="k">if</span> <span class="n">pad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`pad` is incorrect type.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`pad` list length should be 3.&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pad</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;`pad` list elements should be (int, int)&quot;</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># The index limits for the scan.</span>
+        <span class="n">limits</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">511</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">511</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_zvals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+
+        <span class="n">cmatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contours_matrix</span>
+        <span class="n">imin</span><span class="p">,</span><span class="n">jmin</span><span class="p">,</span><span class="n">kmin</span> <span class="o">=</span> <span class="n">cmatrix</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">imax</span><span class="p">,</span><span class="n">jmax</span><span class="p">,</span><span class="n">kmax</span> <span class="o">=</span> <span class="n">cmatrix</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Adding the padding for each respective case, handling the</span>
+        <span class="c1"># borders as needed.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">imin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">imin</span><span class="o">-</span><span class="n">pad</span><span class="p">,</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">imax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">imax</span><span class="o">+</span><span class="n">pad</span><span class="p">,</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">jmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">jmin</span><span class="o">-</span><span class="n">pad</span><span class="p">,</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">jmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">jmax</span><span class="o">+</span><span class="n">pad</span><span class="p">,</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">kmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">kmin</span><span class="o">-</span><span class="n">pad</span><span class="p">,</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">kmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">kmax</span><span class="o">+</span><span class="n">pad</span><span class="p">,</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">imin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">imin</span><span class="o">-</span><span class="n">pad</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">imax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">imax</span><span class="o">+</span><span class="n">pad</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">jmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">jmin</span><span class="o">-</span><span class="n">pad</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">jmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">jmax</span><span class="o">+</span><span class="n">pad</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">kmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">kmin</span><span class="o">-</span><span class="n">pad</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">kmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">kmax</span><span class="o">+</span><span class="n">pad</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="c1"># In this instance, we compute the extend the limits</span>
+            <span class="c1"># until the required physical size is met (or until we can </span>
+            <span class="c1"># no long extend the index).</span>
+            <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span>
+            <span class="n">rk</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_spacing</span>
+
+            <span class="c1"># Check if the desired bbox size is not smaller than is possible.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="n">minsize</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox_dims</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">pad</span> <span class="o">&lt;</span> <span class="n">minsize</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span><span class="s2">&quot;Requested `bbox` size (</span><span class="si">%.4f</span><span class="s2"> mm) is &quot;</span>
+                                      <span class="s2">&quot;less than minimal possible size &quot;</span>
+                                      <span class="s2">&quot;(</span><span class="si">%.4f</span><span class="s2"> mm).&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">minsize</span><span class="p">))</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">imax</span><span class="o">-</span><span class="n">imin</span><span class="p">)</span><span class="o">*</span><span class="n">rij</span> <span class="o">&lt;</span> <span class="n">pad</span><span class="p">:</span>
+                <span class="n">imin</span> <span class="o">-=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">imin</span> <span class="o">&gt;</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">imax</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">imax</span> <span class="o">&lt;</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">imin</span> <span class="o">==</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">imax</span> <span class="o">==</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">break</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">jmax</span><span class="o">-</span><span class="n">jmin</span><span class="p">)</span><span class="o">*</span><span class="n">rij</span> <span class="o">&lt;</span> <span class="n">pad</span><span class="p">:</span>
+                <span class="n">jmin</span> <span class="o">-=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">jmin</span> <span class="o">&gt;</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">jmax</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">jmax</span> <span class="o">&lt;</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">jmin</span> <span class="o">==</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">jmax</span> <span class="o">==</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">break</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">kmax</span><span class="o">-</span><span class="n">kmin</span><span class="p">)</span><span class="o">*</span><span class="n">rk</span>  <span class="o">&lt;</span> <span class="n">pad</span><span class="p">:</span>
+                <span class="n">kmin</span> <span class="o">-=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">kmin</span> <span class="o">&gt;</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">kmax</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">kmax</span> <span class="o">&lt;</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">kmin</span> <span class="o">==</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">kmax</span> <span class="o">==</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">break</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">imin</span><span class="p">,</span><span class="n">imax</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">slice</span><span class="p">(</span><span class="n">jmin</span><span class="p">,</span><span class="n">jmax</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">slice</span><span class="p">(</span><span class="n">kmin</span><span class="p">,</span><span class="n">kmax</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Annotation.bbox_dims"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.bbox_dims">[docs]</a>    <span class="k">def</span> <span class="nf">bbox_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the physical dimensions of the nodule bounding box in mm.</span>
+
+<span class="sd">        pad: int, list, or float, default=None</span>
+<span class="sd">            See :meth:`pylidc.Annotation.bbox` for a </span>
+<span class="sd">            description of this argument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span><span class="p">,]</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_spacing</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">b</span><span class="o">.</span><span class="n">stop</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">b</span><span class="o">.</span><span class="n">start</span><span class="p">)</span><span class="o">*</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="n">pad</span><span class="p">))]</span></div>
+
+
+<div class="viewcode-block" id="Annotation.bbox_matrix"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.bbox_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">bbox_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The `bbox` function returns a tuple of slices to be used to index</span>
+<span class="sd">        into an image volume. On the other hand, `bbox_array` returns</span>
+<span class="sd">        a 3x2 matrix where each row is the (start, stop) indices of the</span>
+<span class="sd">        i, j, and k axes.</span>
+
+<span class="sd">        pad: int, list, or float</span>
+<span class="sd">            See `Annotation.bbox` for description of this argument.</span>
+
+<span class="sd">        NOTE: The indices return by `bbox_array` are *inclusive*, whereas</span>
+<span class="sd">              the indices of the slice objects in the tuple return by `bbox`</span>
+<span class="sd">              are offset by +1 in the &quot;stop&quot; index.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; import pylidc as pl</span>
+<span class="sd">            &gt;&gt;&gt; ann = pl.query(pl.Annotation).first()</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; bb = ann.bbox()</span>
+<span class="sd">            &gt;&gt;&gt; bm = ann.bbox_matrix()</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; print(all([bm[i,0] == bb[i].start for i in range(3)]))</span>
+<span class="sd">            &gt;&gt;&gt; # =&gt; True</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; print(all([bm[i,1]+1 == bb[i].stop for i in range(3)]))</span>
+<span class="sd">            &gt;&gt;&gt; # =&gt; True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">sl</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">sl</span><span class="o">.</span><span class="n">stop</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">sl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="n">pad</span><span class="p">)])</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the center of mass of the nodule as determined by its </span>
+<span class="sd">        radiologist-drawn contours.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; import pylidc as pl</span>
+<span class="sd">            &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; ann = pl.query(pl.Annotation).first()</span>
+<span class="sd">            &gt;&gt;&gt; i,j,k = ann.centroid.round().astype(np.int)</span>
+<span class="sd">            &gt;&gt;&gt; vol = ann.scan.to_volume()</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; plt.imshow(vol[:,:,k], cmap=plt.cm.gray)</span>
+<span class="sd">            &gt;&gt;&gt; plt.plot(j, i, &#39;.r&#39;, label=&quot;Nodule centroid&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; plt.legend()</span>
+<span class="sd">            &gt;&gt;&gt; plt.show()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contours_matrix</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">diameter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimate the greatest axial plane diameter using the annotation&#39;s </span>
+<span class="sd">        contours. This estimation does not currently account for cases </span>
+<span class="sd">        where the diamter passes outside the boundary of the nodule, or </span>
+<span class="sd">        through cavities within the nodule.</span>
+<span class="sd">        </span>
+<span class="sd">        returns: float (or float,Contour)</span>
+<span class="sd">            Returns the diameter as float, accounting for the axial-plane </span>
+<span class="sd">            resolution of the scan. The units are mm.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">greatest_diameter</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span> <span class="c1"># placeholders for max indices</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span><span class="n">contour</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">):</span>
+            <span class="n">contour_array</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">()[:,:</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span>
+
+            <span class="c1"># There&#39;s some edge cases where the contour consists only of </span>
+            <span class="c1"># a single point, which we must ignore.</span>
+            <span class="k">if</span> <span class="n">contour_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="k">continue</span>
+            
+            <span class="c1"># pdist computes the pairwise distances between the points.</span>
+            <span class="c1"># squareform turns the condensed array into matrix where</span>
+            <span class="c1"># entry i,j is ||point_i - point_j||.</span>
+            <span class="n">diameters</span> <span class="o">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">contour_array</span><span class="p">))</span>
+            <span class="n">diameter</span>  <span class="o">=</span> <span class="n">diameters</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">diameter</span> <span class="o">&gt;</span> <span class="n">greatest_diameter</span><span class="p">:</span>
+                <span class="n">greatest_diameter</span> <span class="o">=</span> <span class="n">diameter</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="n">j</span><span class="p">,</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">diameters</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span> <span class="n">diameters</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">greatest_diameter</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">surface_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimate the surface area by summing the areas of a trianglation</span>
+<span class="sd">        of the nodules surface in 3d. Returned units are mm^2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boolean_mask</span><span class="p">()</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)],</span> <span class="s1">&#39;constant&#39;</span><span class="p">)</span> <span class="c1"># Cap the ends.</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+        <span class="n">rij</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span>
+        <span class="n">rk</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_thickness</span>
+        <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">marching_cubes</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="p">(</span><span class="n">rij</span><span class="p">,</span> <span class="n">rij</span><span class="p">,</span> <span class="n">rk</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">mesh_surface_area</span><span class="p">(</span><span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimate the volume of the annotated nodule, using the contour </span>
+<span class="sd">        annotations. Green&#39;s theorem (via the shoelace formula) is first </span>
+<span class="sd">        used to measure the area in each slice. This area is multiplied </span>
+<span class="sd">        by the distance between slices to obtain a volume for each slice, </span>
+<span class="sd">        which is then added or subtracted from the total volume, depending </span>
+<span class="sd">        on if the inclusion value for the contour. </span>
+<span class="sd">        </span>
+<span class="sd">        The distance between slices is taken to be the distance from the </span>
+<span class="sd">        midpoint between the current `image_z_position` and the </span>
+<span class="sd">        `image_z_position` in one slice higher plus the midpoint between </span>
+<span class="sd">        the current `image_z_position` and the `image_z_position` of one </span>
+<span class="sd">        slice below. If the the `image_z_position` corresponds to an end </span>
+<span class="sd">        piece, we use the distance between the current `image_z_posiition` </span>
+<span class="sd">        and the `image_z_position` of one slice below or above for top or </span>
+<span class="sd">        bottom, respectively. If the annotation only has one contour, we </span>
+<span class="sd">        use the `slice_thickness` attribute of the scan.</span>
+
+<span class="sd">        returns: float</span>
+<span class="sd">            The estimated 3D volume of the annotated nodule. Units are mm^3.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">zvals</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">image_z_position</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">])</span>
+
+        <span class="c1"># We pad a zval on the bottom that is the same distance from the</span>
+        <span class="c1"># first zval to the second zval but below the first point. We do </span>
+        <span class="c1"># the same thing for the top zval.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">zlow</span>  <span class="o">=</span> <span class="n">zvals</span><span class="p">[</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">zvals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">zvals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">zhigh</span> <span class="o">=</span> <span class="n">zvals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">zvals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">zvals</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">zvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">zlow</span><span class="p">,</span> <span class="n">zvals</span><span class="p">,</span> <span class="n">zhigh</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">zvals</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">contour</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">):</span>
+            <span class="n">contour_array</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">contour_array</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">contour_array</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># &quot;Shoelace&quot; formula for area.</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
+            
+            <span class="k">if</span> <span class="n">zvals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">contour</span><span class="o">.</span><span class="n">image_z_position</span><span class="o">-</span><span class="n">zvals</span><span class="p">))</span>
+                <span class="n">spacing_z</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">zvals</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">zvals</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">spacing_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_thickness</span>
+
+            <span class="n">volume</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">1.</span> <span class="k">if</span> <span class="n">contour</span><span class="o">.</span><span class="n">inclusion</span> <span class="k">else</span> <span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">*</span> <span class="n">area</span> <span class="o">*</span> <span class="n">spacing_z</span>
+        <span class="k">return</span> <span class="n">volume</span>
+
+<div class="viewcode-block" id="Annotation.visualize_in_3d"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.visualize_in_3d">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_in_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;0.2&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span>
+                        <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;matplotlib&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Visualize in 3d a triangulation of the nodule&#39;s surface.</span>
+
+<span class="sd">        edgecolor: string color or rgb 3-tuple</span>
+<span class="sd">            Sets edgecolors of triangulation.</span>
+<span class="sd">            Ignored if backend != matplotlib.</span>
+
+<span class="sd">        cmap: matplotlib colormap string.</span>
+<span class="sd">            Sets the facecolors of the triangulation.</span>
+<span class="sd">            See `matplotlib.cm.cmap_d.keys()` for all available.</span>
+<span class="sd">            Ignored if backend != matplotlib.</span>
+
+<span class="sd">        step: int, default=1</span>
+<span class="sd">            The `step_size` parameter for the skimage marching_cubes function.</span>
+<span class="sd">            Bigger values are quicker, but yield coarser surfaces.</span>
+
+<span class="sd">        backend: string</span>
+<span class="sd">            The backend for visualization. Default is matplotlib.</span>
+<span class="sd">            Execute `from pylidc.Annotation import viz3dbackends` to</span>
+<span class="sd">            see available backends.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; ann = pl.query(pl.Annotation).first()</span>
+<span class="sd">            &gt;&gt;&gt; ann.visualize_in_3d(edgecolor=&#39;green&#39;, cmap=&#39;autumn&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; ann.visualize_in_3d(backend=&#39;mayavi&#39;) # If mayavi available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">viz3dbackends</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;backend should be in </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">viz3dbackends</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cmap</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">cmap_d</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid `cmap`. See `plt.cm.cmap_d.keys()`.&quot;</span><span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boolean_mask</span><span class="p">()</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)],</span> <span class="s1">&#39;constant&#39;</span><span class="p">)</span> <span class="c1"># Cap the ends.</span>
+
+        <span class="n">rxy</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span>
+        <span class="n">rz</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_thickness</span>
+
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">:</span>
+            <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span> <span class="n">marching_cubes</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">,</span>
+                                               <span class="n">spacing</span><span class="o">=</span><span class="p">(</span><span class="n">rxy</span><span class="p">,</span> <span class="n">rxy</span><span class="p">,</span> <span class="n">rz</span><span class="p">),</span>
+                                               <span class="n">step_size</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+            <span class="n">maxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">verts</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+
+            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">mesh</span> <span class="o">=</span> <span class="n">Poly3DCollection</span><span class="p">(</span><span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">],</span> 
+                                    <span class="n">edgecolor</span><span class="o">=</span><span class="n">edgecolor</span><span class="p">,</span>
+                                    <span class="n">facecolors</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">cmap_d</span><span class="p">[</span><span class="n">cmap</span><span class="p">](</span><span class="n">t</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">add_collection3d</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;length (mm)&#39;</span><span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;length (mm)&#39;</span><span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxes</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">&#39;length (mm)&#39;</span><span class="p">)</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;mayavi&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mayavi</span> <span class="k">import</span> <span class="n">mlab</span>
+                <span class="n">sf</span> <span class="o">=</span> <span class="n">mlab</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">scalar_field</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
+                <span class="n">sf</span><span class="o">.</span><span class="n">spacing</span> <span class="o">=</span> <span class="p">[</span><span class="n">rxy</span><span class="p">,</span> <span class="n">rxy</span><span class="p">,</span> <span class="n">rz</span><span class="p">]</span>
+                <span class="n">mlab</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">iso_surface</span><span class="p">(</span><span class="n">sf</span><span class="p">,</span> <span class="n">contours</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">])</span>
+                <span class="n">mlab</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mayavi could not be imported. Is it installed?&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Annotation.visualize_in_scan"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.visualize_in_scan">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_in_scan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interactive visualization of the slices of the scan along with scan </span>
+<span class="sd">        and annotation information. The visualization begins </span>
+<span class="sd">        (but is not limited to) the first slice where the nodule occurs </span>
+<span class="sd">        (according to the annotation). Contours are plotted atop the images </span>
+<span class="sd">        for visualization and can be toggled on and off.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">load_all_dicom_images</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+        
+        <span class="c1"># Preload contours and sort them by z pos.</span>
+        <span class="n">contours</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">image_z_position</span><span class="p">)</span>
+        <span class="n">fnames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">sorted_dicom_file_names</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">index_of_contour</span> <span class="o">=</span> <span class="p">[</span><span class="n">fnames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">dicom_file_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">contours</span><span class="p">]</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+
+        <span class="n">min_slice</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">index_of_contour</span><span class="p">)</span>
+        <span class="n">max_slice</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">index_of_contour</span><span class="p">)</span>
+        <span class="n">current_slice</span> <span class="o">=</span> <span class="n">min_slice</span>
+
+        <span class="n">ax_image</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">1.0</span><span class="p">])</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ax_image</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">current_slice</span><span class="p">]</span><span class="o">.</span><span class="n">pixel_array</span><span class="p">,</span>
+                              <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span><span class="p">)</span>
+
+        <span class="n">contour_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># We draw all the contours initially and set the visibility</span>
+        <span class="c1"># to False. This works better than trying create and destroy</span>
+        <span class="c1"># plots every time we update the image.</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">contours</span><span class="p">):</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">()</span>
+            <span class="n">cc</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax_image</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">arr</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;-r&#39;</span><span class="p">)</span>
+            <span class="n">cc</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="n">i</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Set the first contour visible.</span>
+            <span class="n">contour_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">cc</span> <span class="p">)</span>
+        <span class="n">ax_image</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">511.5</span><span class="p">);</span> <span class="n">ax_image</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">511.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">ax_image</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Add the scan info table</span>
+        <span class="n">ax_scan_info</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+        <span class="n">ax_scan_info</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">scan_info_table</span> <span class="o">=</span> <span class="n">ax_scan_info</span><span class="o">.</span><span class="n">table</span><span class="p">(</span>
+            <span class="n">cellText</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">[</span><span class="s1">&#39;Patient ID:&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">patient_id</span><span class="p">],</span>
+                <span class="p">[</span><span class="s1">&#39;Slice thickness:&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1"> mm&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_thickness</span><span class="p">],</span>
+                <span class="p">[</span><span class="s1">&#39;Pixel spacing:&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1"> mm&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span><span class="p">]</span>
+            <span class="p">],</span>
+            <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">cellLoc</span><span class="o">=</span><span class="s1">&#39;left&#39;</span>
+        <span class="p">)</span>
+        <span class="c1"># Remove the cell borders.</span>
+        <span class="c1"># It Seems like there should be an easier way to do this...</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">scan_info_table</span><span class="o">.</span><span class="n">properties</span><span class="p">()[</span><span class="s1">&#39;child_artists&#39;</span><span class="p">]:</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="n">ax_scan_info</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Scan Info&#39;</span><span class="p">)</span>
+        <span class="n">ax_scan_info</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+        <span class="n">ax_scan_info</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+
+        <span class="c1"># Add annotations / features table.</span>
+        <span class="n">ax_annotation_info</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+        <span class="n">ax_annotation_info</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create the rows to be displayed in the annotations table.</span>
+        <span class="n">cell_text</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Int&#39;</span><span class="p">):</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;InternalStructure&#39;</span>
+
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">))</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">f</span><span class="p">))</span>
+
+            <span class="n">cell_text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="n">annotation_info_table</span> <span class="o">=</span> <span class="n">ax_annotation_info</span><span class="o">.</span><span class="n">table</span><span class="p">(</span>
+            <span class="n">cellText</span><span class="o">=</span><span class="n">cell_text</span><span class="p">,</span>
+            <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">cellLoc</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">colWidths</span><span class="o">=</span><span class="p">[</span><span class="mf">0.45</span><span class="p">,</span><span class="mf">0.45</span><span class="p">,</span><span class="mf">0.1</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Again, remove cell borders.</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">annotation_info_table</span><span class="o">.</span><span class="n">properties</span><span class="p">()[</span><span class="s1">&#39;child_artists&#39;</span><span class="p">]:</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="n">ax_annotation_info</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Annotation Info&#39;</span><span class="p">)</span>
+        <span class="n">ax_annotation_info</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+        <span class="n">ax_annotation_info</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+
+        <span class="c1"># Add the checkbox for turning contours on / off.</span>
+        <span class="n">ax_contour_checkbox</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">])</span>
+        <span class="n">ax_contour_checkbox</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">contour_checkbox</span> <span class="o">=</span> <span class="n">CheckButtons</span><span class="p">(</span><span class="n">ax_contour_checkbox</span><span class="p">,</span>
+                                        <span class="p">(</span><span class="s1">&#39;Show Contours&#39;</span><span class="p">,),</span> <span class="p">(</span><span class="kc">True</span><span class="p">,))</span>
+        <span class="n">contour_checkbox</span><span class="o">.</span><span class="n">is_checked</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Add the widgets.</span>
+        <span class="n">ax_slice</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">])</span>
+        <span class="n">ax_slice</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;Z: </span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">float</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">current_slice</span><span class="p">]</span><span class="o">.</span><span class="n">ImagePositionPatient</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> 
+        <span class="n">sslice</span> <span class="o">=</span> <span class="n">Slider</span><span class="p">(</span><span class="n">ax_slice</span><span class="p">,</span>
+                        <span class="n">txt</span><span class="p">,</span>
+                        <span class="mi">0</span><span class="p">,</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">valinit</span><span class="o">=</span><span class="n">current_slice</span><span class="p">,</span>
+                        <span class="n">valfmt</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;Slice: </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+            <span class="c1"># Update image itself.</span>
+            <span class="n">current_slice</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sslice</span><span class="o">.</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">current_slice</span><span class="p">]</span><span class="o">.</span><span class="n">pixel_array</span><span class="p">)</span>
+            <span class="n">txt</span><span class="o">=</span><span class="s1">&#39;Z: </span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">float</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">current_slice</span><span class="p">]</span><span class="o">.</span><span class="n">ImagePositionPatient</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">sslice</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">contour_checkbox</span><span class="o">.</span><span class="n">is_checked</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">contour_lines</span><span class="p">):</span>
+                    <span class="n">flag</span> <span class="o">=</span> <span class="p">(</span><span class="n">index_of_contour</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">current_slice</span><span class="p">)</span>
+                    <span class="n">flag</span> <span class="o">=</span> <span class="n">flag</span> <span class="ow">and</span> <span class="p">(</span><span class="n">current_slice</span> <span class="o">&gt;=</span> <span class="n">min_slice</span><span class="p">)</span>
+                    <span class="n">flag</span> <span class="o">=</span> <span class="n">flag</span> <span class="ow">and</span> <span class="p">(</span><span class="n">current_slice</span> <span class="o">&lt;=</span> <span class="n">max_slice</span><span class="p">)</span>
+                    <span class="c1"># Set contour visible if flag is True.</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">contour_lines</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">update_contours</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+            <span class="n">contour_checkbox</span><span class="o">.</span><span class="n">is_checked</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">contour_checkbox</span><span class="o">.</span><span class="n">is_checked</span>
+            <span class="n">update</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="c1"># update requires an argument.</span>
+
+        <span class="n">sslice</span><span class="o">.</span><span class="n">on_changed</span><span class="p">(</span><span class="n">update</span><span class="p">)</span>
+        <span class="n">contour_checkbox</span><span class="o">.</span><span class="n">on_clicked</span><span class="p">(</span><span class="n">update_contours</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">contour_slice_zvals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns an array of unique z-coordinates for the contours.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">image_z_position</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">])</span>        
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">contour_slice_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of indices into the scan where each contour</span>
+<span class="sd">        belongs. An example should clarify:</span>
+
+<span class="sd">        &gt;&gt;&gt; import pylidc as pl</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; ann = pl.query(pl.Annotation)</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; zvals = ann.contour_slice_zvals</span>
+<span class="sd">        &gt;&gt;&gt; kvals = ann.contour_slice_indices</span>
+<span class="sd">        &gt;&gt;&gt; scan_zvals = ann.scan.slice_zvals</span>
+<span class="sd">        &gt;&gt;&gt; </span>
+<span class="sd">        &gt;&gt;&gt; for k,z in zip(kvals, zvals):</span>
+<span class="sd">        &gt;&gt;&gt;     # the two z values should the same (up to machine precision)</span>
+<span class="sd">        &gt;&gt;&gt;     print(k, z, scan_zvals[k]) </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">slc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_zvals</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">slc</span><span class="o">-</span><span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_slice_zvals</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">contours_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return all the contours in a 3D numpy array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">include_k</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">image_z_position</span><span class="p">)])</span>
+
+<div class="viewcode-block" id="Annotation.boolean_mask"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.boolean_mask">[docs]</a>    <span class="k">def</span> <span class="nf">boolean_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A boolean volume where 1 indicates nodule and 0 indicates</span>
+<span class="sd">        non-nodule. The `mask` volume covers the extent of the voxels</span>
+<span class="sd">        in the image volume given by `annotation.bbox`, i.e., the `mask`</span>
+<span class="sd">        volume would be placed in the full image volume according to</span>
+<span class="sd">        the `bbox` attribute.</span>
+
+<span class="sd">        pad: int, list, or float, default=None</span>
+<span class="sd">            See `Annotation.bbox` for description of this argument.</span>
+
+<span class="sd">        bbox: 3x2 NumPy array, default=None</span>
+<span class="sd">            If `bbox` is provided, then `pad` is ignored. This argument allows</span>
+<span class="sd">            for more fine-tuned control of placement of the mask in a volume,</span>
+<span class="sd">            or for pre-computation of bbox when working with multiple </span>
+<span class="sd">            Annotation object.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; import pylidc as pl</span>
+<span class="sd">            &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; ann = pl.query(pl.Annotation).first()</span>
+<span class="sd">            &gt;&gt;&gt; vol = ann.scan.to_volume()</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; mask = ann.boolean_mask()</span>
+<span class="sd">            &gt;&gt;&gt; bbox = ann.bbox()</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; print(&quot;Avg HU inside nodule: %.1f&quot; % vol[bbox][mask].mean())</span>
+<span class="sd">            &gt;&gt;&gt; # =&gt; Avg HU inside nodule: -280.0</span>
+<span class="sd">            &gt;&gt;&gt; print(&quot;Avg HU outside nodule: %.1f&quot; % vol[bbox][~mask].mean())</span>
+<span class="sd">            &gt;&gt;&gt; # =&gt; Avg HU outside nodule: -732.2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox_matrix</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="n">pad</span><span class="p">)</span> <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bbox</span>
+
+        <span class="n">czs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_slice_zvals</span>
+        <span class="n">cks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_slice_indices</span>
+
+        <span class="n">zs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_zvals</span>
+        <span class="n">zs</span> <span class="o">=</span> <span class="n">zs</span><span class="p">[</span><span class="n">cks</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">cks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Lambda to map a z-value to its appropriate index in the volume.</span>
+        <span class="n">z_to_index</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">czs</span><span class="p">,</span><span class="n">cks</span><span class="p">))[</span><span class="n">z</span><span class="p">]</span> <span class="o">-</span> <span class="n">bb</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="c1">#cks[0]</span>
+
+        <span class="c1"># Get dimensions, initialize mask.</span>
+        <span class="n">ni</span><span class="p">,</span><span class="n">nj</span><span class="p">,</span><span class="n">nk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ni</span><span class="p">,</span><span class="n">nj</span><span class="p">,</span><span class="n">nk</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+
+        <span class="c1"># We check if these points are enclosed within each contour </span>
+        <span class="c1"># for a given slice. `test_points` is a list of image coordinate </span>
+        <span class="c1"># points, offset by the bounding box.</span>
+        <span class="n">ii</span><span class="p">,</span><span class="n">jj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">test_points</span> <span class="o">=</span> <span class="n">bb</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">ii</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">jj</span><span class="o">.</span><span class="n">flatten</span><span class="p">()]</span>
+
+        <span class="c1"># First we &quot;turn on&quot; pixels enclosed by inclusion contours.</span>
+        <span class="k">for</span> <span class="n">contour</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">contour</span><span class="o">.</span><span class="n">inclusion</span><span class="p">:</span>
+                <span class="n">zi</span> <span class="o">=</span> <span class="n">z_to_index</span><span class="p">(</span><span class="n">contour</span><span class="o">.</span><span class="n">image_z_position</span><span class="p">)</span>
+                <span class="n">C</span>  <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">include_k</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+                <span class="c1"># Turn the contour closed if it&#39;s not.</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">C</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="c1"># Create path object and test all pixels</span>
+                <span class="c1"># within the contour&#39;s bounding box.</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">mplpath</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">contains_pts</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="n">test_points</span><span class="p">)</span>
+                <span class="n">contains_pts</span> <span class="o">=</span> <span class="n">contains_pts</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+                <span class="c1"># The logical or here prevents the cases where a single</span>
+                <span class="c1"># slice contains multiple inclusion regions.</span>
+                <span class="n">mask</span><span class="p">[:,:,</span><span class="n">zi</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">mask</span><span class="p">[:,:,</span><span class="n">zi</span><span class="p">],</span> <span class="n">contains_pts</span><span class="p">)</span>
+
+        <span class="c1"># Second, we &quot;turn off&quot; pixels enclosed by exclusion contours.</span>
+        <span class="k">for</span> <span class="n">contour</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">contour</span><span class="o">.</span><span class="n">inclusion</span><span class="p">:</span>
+                <span class="n">zi</span> <span class="o">=</span> <span class="n">z_to_index</span><span class="p">(</span><span class="n">contour</span><span class="o">.</span><span class="n">image_z_position</span><span class="p">)</span>
+                <span class="n">C</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">include_k</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+                <span class="c1"># Turn the contour closed if it&#39;s not.</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">C</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="n">path</span> <span class="o">=</span> <span class="n">mplpath</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">not_contains_pts</span> <span class="o">=</span> <span class="o">~</span><span class="n">path</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="n">test_points</span><span class="p">)</span>
+                <span class="n">not_contains_pts</span> <span class="o">=</span> <span class="n">not_contains_pts</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">mask</span><span class="p">[:,:,</span><span class="n">zi</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask</span><span class="p">[:,:,</span><span class="n">zi</span><span class="p">],</span> <span class="n">not_contains_pts</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mask</span></div>
+
+    <span class="k">def</span> <span class="nf">_as_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Private function used to computed overlap between nodules of the </span>
+<span class="sd">        same scan. This function returns a set where is element is a </span>
+<span class="sd">        3-tuple referring to a voxel within the scan. If the voxel is </span>
+<span class="sd">        in the set, the nodule is considered to be defined there.</span>
+<span class="sd">        </span>
+<span class="sd">        Essentially this is a boolean mask stored as a set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">included</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">excluded</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="c1"># Add all points lying within each inclusion contour to S.</span>
+        <span class="k">for</span> <span class="n">contour</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">:</span>
+            <span class="n">contour_matrix</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">()[:,:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="c1"># Turn the contour closed if it&#39;s not.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contour_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">contour_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">contour_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contour_matrix</span><span class="p">,</span>
+                                           <span class="n">contour_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span>
+                                           <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># Create path object and test all pixels </span>
+            <span class="c1"># within the contour&#39;s bounding box.</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">mplpath</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">contour_matrix</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">mn</span> <span class="o">=</span> <span class="n">contour_matrix</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">mx</span> <span class="o">=</span> <span class="n">contour_matrix</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="n">mn</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">mx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">mn</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">mx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">test_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">flatten</span><span class="p">()]</span>
+            <span class="n">points_in_contour</span> <span class="o">=</span> <span class="n">test_points</span><span class="p">[</span><span class="n">path</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="n">test_points</span><span class="p">)]</span>
+
+            <span class="c1"># Add the z coordinate.</span>
+            <span class="n">points_in_contour</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span>\
+                <span class="n">points_in_contour</span><span class="p">,</span>\
+                <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">points_in_contour</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">contour</span><span class="o">.</span><span class="n">image_z_position</span>
+            <span class="p">]</span>
+
+            <span class="c1"># Now turn the numpy matrix into a list of tuples,</span>
+            <span class="c1"># so we can add it to the corresponding set.</span>
+            <span class="n">points_in_contour</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">points_in_contour</span><span class="p">))</span>
+
+            <span class="c1"># Update the corresponding set.</span>
+            <span class="k">if</span> <span class="n">contour</span><span class="o">.</span><span class="n">inclusion</span><span class="p">:</span>
+                <span class="n">included</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">points_in_contour</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">excluded</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">points_in_contour</span><span class="p">)</span>
+        <span class="c1"># Return the included points minus the excluded points.</span>
+        <span class="k">return</span> <span class="n">included</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span> <span class="n">excluded</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="Annotation.uniform_cubic_resample"><a class="viewcode-back" href="../../annotation.html#pylidc.Annotation.uniform_cubic_resample">[docs]</a>    <span class="k">def</span> <span class="nf">uniform_cubic_resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">side_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resample_vol</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">irp_pts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_irp_pts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                               <span class="n">resample_img</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the CT value volume and respective boolean mask volume. The </span>
+<span class="sd">        volumes are interpolated and resampled to have uniform spacing of 1mm</span>
+<span class="sd">        along each dimension. The resulting volumes are cubic of the </span>
+<span class="sd">        specified `side_length`. Thus, the returned volumes have dimensions,</span>
+<span class="sd">        `(side_length+1,)*3` (since `side_length` is the spacing).</span>
+
+
+<span class="sd">        side_length: integer, default None</span>
+<span class="sd">            The physical length of each side of the new cubic </span>
+<span class="sd">            volume in millimeters. The default, `None`, takes the</span>
+<span class="sd">            max of the nodule&#39;s bounding box dimensions.</span>
+
+<span class="sd">            If this parameter is not `None`, then it should be </span>
+<span class="sd">            greater than any bounding box dimension. If the specified </span>
+<span class="sd">            `side_length` requires a padding which results in an </span>
+<span class="sd">            out-of-bounds image index, then the image is padded with </span>
+<span class="sd">            the minimum CT image value.</span>
+
+<span class="sd">        resample_vol: boolean, default True</span>
+<span class="sd">            If False, only the segmentation volume is resampled.</span>
+
+<span class="sd">        irp_pts: 3-tuple from meshgrid</span>
+<span class="sd">            If provided, the volume(s) will be resampled over these interpolation</span>
+<span class="sd">            points, rather than the automatically calculated points. This allows</span>
+<span class="sd">            for sampling segmentation volumes over a common coordinate-system.</span>
+
+<span class="sd">        return_irp_pts: boolean, default False</span>
+<span class="sd">            If True, the interpolation points (ix,iy,iz) at which the volume(s)</span>
+<span class="sd">            were resampled are returned. These can potentially be provided as</span>
+<span class="sd">            an argument to `irp_pts` for separate selfotations that refer to the</span>
+<span class="sd">            same nodule, allowing the segmentation volumes to be resampled in a</span>
+<span class="sd">            common coordinate-system.</span>
+
+<span class="sd">        verbose: boolean, default True</span>
+<span class="sd">            Turn the loading statement on / off.</span>
+
+<span class="sd">        returns: [ct_volume,] mask [, irp_pts]</span>
+<span class="sd">            `ct_volume` and `mask` are the resampled CT and boolean </span>
+<span class="sd">            volumes, respectively. `ct_volume` and `irp_points` are optionally</span>
+<span class="sd">            returned, depending on which flags are set (see above).</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; ann = pl.query(pl.Annotation).first()</span>
+<span class="sd">            &gt;&gt;&gt; ct_volume, mask = ann.uniform_cubic_resample(side_length=70)</span>
+<span class="sd">            &gt;&gt;&gt; print(ct_volume.shape, mask.shape)</span>
+<span class="sd">            &gt;&gt;&gt; # =&gt; (71, 71, 71), (71, 71, 71)</span>
+<span class="sd">            &gt;&gt;&gt; # (Nodule is centered at (35,35,35).)</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">            &gt;&gt;&gt; plt.imshow( ct_volume[:,:,35] * (0.2 + 0.8*mask[:,:,35]) )</span>
+<span class="sd">            &gt;&gt;&gt; plt.show()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bbox</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span>
+        <span class="n">bboxd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox_dimensions</span>
+        <span class="n">rxy</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">pixel_spacing</span>
+
+        <span class="n">imin</span><span class="p">,</span><span class="n">imax</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">jmin</span><span class="p">,</span><span class="n">jmax</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span> <span class="o">=</span> <span class="n">imin</span><span class="o">*</span><span class="n">rxy</span><span class="p">,</span> <span class="n">imax</span><span class="o">*</span><span class="n">rxy</span>
+        <span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span> <span class="o">=</span> <span class="n">jmin</span><span class="o">*</span><span class="n">rxy</span><span class="p">,</span> <span class="n">jmax</span><span class="o">*</span><span class="n">rxy</span>
+        <span class="n">zmin</span><span class="p">,</span><span class="n">zmax</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># { Begin input checks.</span>
+        <span class="k">if</span> <span class="n">side_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">side_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">bboxd</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">side_length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;`side_length` must be an integer.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">side_length</span> <span class="o">&lt;</span> <span class="n">bboxd</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`side_length` must be greater</span><span class="se">\</span>
+<span class="s1">                                   than any bounding box dimension.&#39;</span><span class="p">)</span>
+        <span class="n">side_length</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">side_length</span><span class="p">)</span>
+        <span class="c1"># } End input checks.</span>
+
+        <span class="c1"># Load the images. Get the z positions.</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">load_all_dicom_images</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">img_zs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">ImagePositionPatient</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
+        <span class="n">img_zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">img_zs</span><span class="p">)</span>
+
+        <span class="c1"># Get the z values of the contours.</span>
+        <span class="n">contour_zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">image_z_position</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="p">])</span>
+
+        <span class="c1"># Get the indices where the nodule stops and starts</span>
+        <span class="c1"># with respect to the scan z values.</span>
+        <span class="n">kmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">zmin</span> <span class="o">==</span> <span class="n">img_zs</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">kmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">zmax</span> <span class="o">==</span> <span class="n">img_zs</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Initialize the boolean mask.</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boolean_mask</span><span class="p">()</span>
+
+        <span class="c1">########################################################</span>
+        <span class="c1"># { Begin mask corrections.</span>
+
+        <span class="c1"># This block handles the case where </span>
+        <span class="c1"># the contour selfotations &quot;skip a slice&quot;.</span>
+        <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="p">(</span><span class="n">kmax</span><span class="o">-</span><span class="n">kmin</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">old_mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            
+            <span class="c1"># Create the new mask with appropriate z-length.</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">old_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">old_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                             <span class="n">kmax</span><span class="o">-</span><span class="n">kmin</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+
+            <span class="c1"># Map z&#39;s to an integer.</span>
+            <span class="n">z_to_index</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+                            <span class="n">img_zs</span><span class="p">[</span><span class="n">kmin</span><span class="p">:</span><span class="n">kmax</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="nb">range</span><span class="p">(</span><span class="n">img_zs</span><span class="p">[</span><span class="n">kmin</span><span class="p">:</span><span class="n">kmax</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                         <span class="p">))</span>
+
+            <span class="c1"># Map each slice to its correct location.</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">old_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">mask</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">z_to_index</span><span class="p">[</span><span class="n">contour_zs</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="p">]</span> <span class="o">=</span> <span class="n">old_mask</span><span class="p">[:,:,</span><span class="n">k</span><span class="p">]</span>
+
+            <span class="c1"># Get rid of the old one.</span>
+            <span class="k">del</span> <span class="n">old_mask</span>
+
+        <span class="c1"># } End mask corrections.</span>
+        <span class="c1">########################################################</span>
+
+        <span class="c1">########################################################</span>
+        <span class="c1"># { Begin interpolation grid creation.</span>
+        <span class="c1">#   (The points at which the volumes will be resampled.)</span>
+
+        <span class="c1"># Compute new interpolation grid points in x.</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">side_length</span><span class="o">-</span><span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">))</span>
+        <span class="n">xhat</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xmin</span><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">xmax</span><span class="o">+</span><span class="n">d</span><span class="p">,</span>
+                                 <span class="nb">int</span><span class="p">(</span><span class="n">side_length</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">retstep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">step</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="s2">&quot;New x spacing != 1.&quot;</span>
+
+        <span class="c1"># Do the same for y.</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">side_length</span><span class="o">-</span><span class="p">(</span><span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span><span class="p">))</span>
+        <span class="n">yhat</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">ymin</span><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">ymax</span><span class="o">+</span><span class="n">d</span><span class="p">,</span>
+                                 <span class="nb">int</span><span class="p">(</span><span class="n">side_length</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">retstep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">step</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="s2">&quot;New y spacing != 1.&quot;</span>
+
+        <span class="c1"># Do the same for z.</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">side_length</span><span class="o">-</span><span class="p">(</span><span class="n">zmax</span> <span class="o">-</span> <span class="n">zmin</span><span class="p">))</span>
+        <span class="n">zhat</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">zmin</span><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">zmax</span><span class="o">+</span><span class="n">d</span><span class="p">,</span>
+                                 <span class="nb">int</span><span class="p">(</span><span class="n">side_length</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">retstep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">step</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="s2">&quot;New z pixel spacing != 1.&quot;</span>
+
+        <span class="c1"># } End interpolation grid creation.</span>
+        <span class="c1">########################################################</span>
+
+        <span class="c1">########################################################</span>
+        <span class="c1"># { Begin grid creation.</span>
+        <span class="c1">#   (The points at which the volumes are assumed to be sampled.)</span>
+
+        <span class="c1"># a[x|y|z], b[x|y|z] are the start / stop indexes for the </span>
+        <span class="c1"># (non resample) sample grids along each respective axis.</span>
+
+        <span class="c1"># It helps to draw a diagram. For example,</span>
+        <span class="c1">#</span>
+        <span class="c1"># *--*--*-- ...</span>
+        <span class="c1"># x3 x4 x5</span>
+        <span class="c1">#  *---*---*--- ...</span>
+        <span class="c1">#  xhat0</span>
+        <span class="c1">#</span>
+        <span class="c1"># In this case, `ax` would be chosen to be 3</span>
+        <span class="c1"># since this is the index directly to the left of </span>
+        <span class="c1"># `xhat[0]`. If `xhat[0]` is below any grid point,</span>
+        <span class="c1"># then `ax` is the minimum possible index, 0. A similar</span>
+        <span class="c1"># diagram helps with the `bx` index.</span>
+
+        <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span><span class="o">*</span><span class="n">rxy</span>
+
+        <span class="k">if</span> <span class="n">xhat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">&lt;</span> <span class="n">xhat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">xhat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">T</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">bx</span> <span class="o">=</span> <span class="mi">512</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bx</span> <span class="o">=</span> <span class="mi">512</span> <span class="o">-</span> <span class="p">(</span><span class="n">T</span> <span class="o">&gt;</span> <span class="n">xhat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">yhat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ay</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ay</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">&lt;</span> <span class="n">yhat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">yhat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">T</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">by</span> <span class="o">=</span> <span class="mi">512</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">by</span> <span class="o">=</span> <span class="mi">512</span> <span class="o">-</span> <span class="p">(</span><span class="n">T</span> <span class="o">&gt;</span> <span class="n">yhat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">zhat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">img_zs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">az</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">az</span> <span class="o">=</span> <span class="p">(</span><span class="n">img_zs</span> <span class="o">&lt;</span> <span class="n">zhat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">zhat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">img_zs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">bz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_zs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_zs</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">img_zs</span> <span class="o">&gt;</span> <span class="n">zhat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+        
+        <span class="c1"># These are the actual grids.</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">ax</span><span class="p">:</span><span class="n">bx</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">ay</span><span class="p">:</span><span class="n">by</span><span class="p">]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">img_zs</span><span class="p">[</span><span class="n">az</span><span class="p">:</span><span class="n">bz</span><span class="p">]</span>
+
+        <span class="c1"># } End grid creation.</span>
+        <span class="c1">########################################################</span>
+
+
+        <span class="c1"># Create the non-interpolated CT volume.</span>
+        <span class="k">if</span> <span class="n">resample_vol</span><span class="p">:</span>
+            <span class="n">ctvol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="o">+</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="o">+</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">ctvol</span><span class="p">[:,:,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="n">az</span><span class="p">]</span><span class="o">.</span><span class="n">pixel_array</span><span class="p">[</span><span class="n">ax</span><span class="p">:</span><span class="n">bx</span><span class="p">,</span> <span class="n">ay</span><span class="p">:</span><span class="n">by</span><span class="p">]</span>
+
+        <span class="c1"># We currently only have the boolean mask volume on the domain</span>
+        <span class="c1"># of the bounding box. Thus, we must &quot;place it&quot; in the appropriately</span>
+        <span class="c1"># sized volume (i.e., `ctvol.shape`). This is accomplished by</span>
+        <span class="c1"># padding `mask`.</span>
+        <span class="n">padvals</span> <span class="o">=</span> <span class="p">[(</span><span class="n">imin</span><span class="o">-</span><span class="n">ax</span><span class="p">,</span> <span class="n">bx</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">imax</span><span class="p">),</span> <span class="c1"># The `b` terms have a `+1` offset</span>
+                   <span class="p">(</span><span class="n">jmin</span><span class="o">-</span><span class="n">ay</span><span class="p">,</span> <span class="n">by</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">jmax</span><span class="p">),</span> <span class="c1"># from being an index that is</span>
+                   <span class="p">(</span><span class="n">kmin</span><span class="o">-</span><span class="n">az</span><span class="p">,</span> <span class="n">bz</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">kmax</span><span class="p">)]</span> <span class="c1"># correct with the `-1` here.</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="n">padvals</span><span class="p">,</span>
+                      <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Obtain minimum image value to use as const for interpolation.</span>
+        <span class="k">if</span> <span class="n">resample_vol</span><span class="p">:</span>
+            <span class="n">fillval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">img</span><span class="o">.</span><span class="n">pixel_array</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">irp_pts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">,</span><span class="n">iz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xhat</span><span class="p">,</span> <span class="n">yhat</span><span class="p">,</span> <span class="n">zhat</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">,</span><span class="n">iz</span> <span class="o">=</span> <span class="n">irp_pts</span>
+        <span class="n">IXYZ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">ix</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">iy</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">iz</span><span class="o">.</span><span class="n">flatten</span><span class="p">()]</span>
+
+        <span class="c1"># Interpolate the nodule CT volume.</span>
+        <span class="k">if</span> <span class="n">resample_vol</span><span class="p">:</span>
+            <span class="n">rgi</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="n">ctvol</span><span class="p">,</span>
+                                          <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fillval</span><span class="p">)</span>
+            <span class="n">ictvol</span> <span class="o">=</span> <span class="n">rgi</span><span class="p">(</span><span class="n">IXYZ</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="c1"># Interpolate the mask volume.</span>
+        <span class="n">rgi</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+                                      <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">imask</span> <span class="o">=</span> <span class="n">rgi</span><span class="p">(</span><span class="n">IXYZ</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">resample_vol</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_irp_pts</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ictvol</span><span class="p">,</span> <span class="n">imask</span><span class="p">,</span> <span class="p">(</span><span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">,</span><span class="n">iz</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ictvol</span><span class="p">,</span> <span class="n">imask</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_irp_pts</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">imask</span><span class="p">,</span> <span class="p">(</span><span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">,</span><span class="n">iz</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">imask</span></div></div>
+
+
+<span class="c1"># Add the relationship to the Scan model.</span>
+<span class="n">Scan</span><span class="o">.</span><span class="n">annotations</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;Annotation&#39;</span><span class="p">,</span>
+                                <span class="n">order_by</span><span class="o">=</span><span class="n">Annotation</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                <span class="n">back_populates</span><span class="o">=</span><span class="s1">&#39;scan&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pylidc  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Matt Hancock.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>
