@@ -1,5 +1,5 @@
-The Contour Model
-====================
+Contour
+=======
 
 .. autoclass:: pylidc.Contour
     :members:

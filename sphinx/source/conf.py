@@ -91,8 +91,8 @@ todo_include_todos = True
 #
 #html_theme = 'haiku'
 #html_theme = 'alabaster'
-html_theme = 'bizstyle'
-#html_theme = 'pyramid'
+#html_theme = 'bizstyle'
+html_theme = 'pyramid'
 #html_theme = 'nature'
 #html_theme = 'traditional'
 #html_theme = 'scrolls'
@@ -117,10 +117,13 @@ html_static_path = ['_static']
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 html_sidebars = {
     '**': [
+        'globaltoc.html',
         'relations.html',  # needs 'show_related': True theme option to display
         'searchbox.html',
     ]
 }
+html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'], }
+
 
 
 # -- Options for HTMLHelp output ------------------------------------------

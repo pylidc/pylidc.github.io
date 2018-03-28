@@ -1,0 +1,182 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Annotation Consensus &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Scan" href="../scan.html" />
+    <link rel="prev" title="The Annotation class" href="annotation.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../scan.html" title="Scan"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="annotation.html" title="The Annotation class"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="annotation-consensus">
+<h1>Annotation Consensus<a class="headerlink" href="#annotation-consensus" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.consensus()</span></code> utility accepts a list of annotations to
+produce a single boolean-valued volume of those annotations. It also returns
+the individual boolean masks for each Annotation, placed in a common frame of
+reference – i.e., a common bounding box, which is also returned.</p>
+<p>In the following example, we first compute the 50% consensus consolidation of
+the annotation contours, then we plot them along with the original 4 contours
+from the 4 different annotations of the nodule:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.animation</span> <span class="kn">as</span> <span class="nn">manim</span>
+<span class="kn">from</span> <span class="nn">skimage.measure</span> <span class="kn">import</span> <span class="n">find_contours</span>
+
+<span class="kn">import</span> <span class="nn">pylidc</span> <span class="kn">as</span> <span class="nn">pl</span>
+
+
+<span class="c1"># Query for a scan, and convert it to an array volume.</span>
+<span class="n">scan</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">patient_id</span> <span class="o">==</span> <span class="s1">&#39;LIDC-IDRI-0078&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">vol</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">to_volume</span><span class="p">()</span>
+
+<span class="c1"># Cluster the annotations for the scan, and grab one.</span>
+<span class="n">nods</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">cluster_annotations</span><span class="p">()</span>
+<span class="n">anns</span> <span class="o">=</span> <span class="n">nods</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Perform a consensus consolidation and 50% agreement level.</span>
+<span class="c1"># We pad the slices to add context for viewing.</span>
+<span class="n">cmask</span><span class="p">,</span><span class="n">cbbox</span><span class="p">,</span><span class="n">masks</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">consensus</span><span class="p">(</span><span class="n">anns</span><span class="p">,</span> <span class="n">clevel</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                                 <span class="n">pad</span><span class="o">=</span><span class="p">[(</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)])</span>
+
+<span class="c1"># Get the central slice of the computed bounding box.</span>
+<span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">cbbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">stop</span> <span class="o">-</span> <span class="n">cbbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
+
+<span class="c1"># Set up the plot.</span>
+<span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">vol</span><span class="p">[</span><span class="n">cbbox</span><span class="p">][:,:,</span><span class="n">k</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="c1"># Plot the annotation contours for the kth slice.</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">find_contours</span><span class="p">(</span><span class="n">masks</span><span class="p">[</span><span class="n">j</span><span class="p">][:,:,</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Annotation </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">colors</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+
+<span class="c1"># Plot the 50% consensus contour for the kth slice.</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">find_contours</span><span class="p">(</span><span class="n">cmask</span><span class="p">[:,:,</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;--k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;50% Consensus&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="c1">#plt.savefig(&quot;../images/consensus.png&quot;, bbox_inches=&quot;tight&quot;)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference external image-reference" href="../_images/consensus.png"><img alt="../_images/consensus.png" src="../_images/consensus.png" /></a>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta information</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation and setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scan.html">The Scan class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="annotation.html">The Annotation class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Annotation Consensus</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Full API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scan.html">Scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation.html">Annotation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contour.html">Contour</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="annotation.html"
+                        title="previous chapter">The Annotation class</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../scan.html"
+                        title="next chapter">Scan</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tuts/consensus.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../scan.html" title="Scan"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="annotation.html" title="The Annotation class"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Matt Hancock.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

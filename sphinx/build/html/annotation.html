@@ -1,28 +1,30 @@
 
-
-<!doctype html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>The Annotation Model &#8212; pylidc  documentation</title>
-    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <title>Annotation &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="The Contour Model" href="contour.html" />
-    <link rel="prev" title="The Scan Model" href="scan.html" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <!--[if lt IE 9]>
-    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
-    <![endif]-->
+    <link rel="next" title="Contour" href="contour.html" />
+    <link rel="prev" title="Scan" href="scan.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
   </head><body>
+
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -30,44 +32,22 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="contour.html" title="The Contour Model"
+          <a href="contour.html" title="Contour"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="scan.html" title="The Scan Model"
+          <a href="scan.html" title="Scan"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pylidc  documentation</a> &#187;</li> 
       </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="scan.html"
-                        title="previous chapter">The Scan Model</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="contour.html"
-                        title="next chapter">The Contour Model</a></p>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="the-annotation-model">
-<h1>The Annotation Model<a class="headerlink" href="#the-annotation-model" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="annotation">
+<h1>Annotation<a class="headerlink" href="#annotation" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pylidc.Annotation">
 <em class="property">class </em><code class="descclassname">pylidc.</code><code class="descname">Annotation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Annotation.html#Annotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Annotation" title="Permalink to this definition">¶</a></dt>
@@ -462,7 +442,7 @@ returned, depending on which flags are set (see above).</dd>
 
 <dl class="method">
 <dt id="pylidc.Annotation.visualize_in_3d">
-<code class="descname">visualize_in_3d</code><span class="sig-paren">(</span><em>edgecolor='0.2'</em>, <em>cmap='viridis'</em>, <em>step=1</em>, <em>backend='matplotlib'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Annotation.html#Annotation.visualize_in_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Annotation.visualize_in_3d" title="Permalink to this definition">¶</a></dt>
+<code class="descname">visualize_in_3d</code><span class="sig-paren">(</span><em>edgecolor='0.2'</em>, <em>cmap='viridis'</em>, <em>step=1</em>, <em>figsize=(5</em>, <em>5)</em>, <em>backend='matplotlib'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Annotation.html#Annotation.visualize_in_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Annotation.visualize_in_3d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize in 3d a triangulation of the nodule’s surface.</p>
 <dl class="docutils">
 <dt>edgecolor: string color or rgb 3-tuple</dt>
@@ -475,6 +455,8 @@ Ignored if backend != matplotlib.</dd>
 <dt>step: int, default=1</dt>
 <dd>The <cite>step_size</cite> parameter for the skimage marching_cubes function.
 Bigger values are quicker, but yield coarser surfaces.</dd>
+<dt>figsize: tuple, default=(5,5)</dt>
+<dd>Figure size for the displayed volume.</dd>
 <dt>backend: string</dt>
 <dd>The backend for visualization. Default is matplotlib.
 Execute <cite>from pylidc.Annotation import viz3dbackends</cite> to
@@ -530,6 +512,50 @@ use the <cite>slice_thickness</cite> attribute of the scan.</p>
           </div>
         </div>
       </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and setup</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tuts/scan.html">The Scan class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/annotation.html">The Annotation class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/consensus.html">Consolidation of multiple annotations of a single nodule</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scan.html">Scan</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Annotation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="scan.html"
+                        title="previous chapter">Scan</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="contour.html"
+                        title="next chapter">Contour</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/annotation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
       <div class="clearer"></div>
     </div>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -539,10 +565,10 @@ use the <cite>slice_thickness</cite> attribute of the scan.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="contour.html" title="The Contour Model"
+          <a href="contour.html" title="Contour"
              >next</a> |</li>
         <li class="right" >
-          <a href="scan.html" title="The Scan Model"
+          <a href="scan.html" title="Scan"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pylidc  documentation</a> &#187;</li> 
       </ul>

@@ -1,0 +1,165 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Installation and setup &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Scan class" href="tuts/scan.html" />
+    <link rel="prev" title="pylidc" href="index.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tuts/scan.html" title="The Scan class"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="pylidc"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation-and-setup">
+<h1>Installation and setup<a class="headerlink" href="#installation-and-setup" title="Permalink to this headline">¶</a></h1>
+<p><cite>pylidc</cite> works on Linux, Mac, and Windows, and on Python 2 and 3.</p>
+<p>The package can be installed via <cite>pip</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pylidc</span>
+</pre></div>
+</div>
+<div class="section" id="dicom-file-directory-configuration">
+<h2>Dicom file directory configuration<a class="headerlink" href="#dicom-file-directory-configuration" title="Permalink to this headline">¶</a></h2>
+<p>While <cite>pylidc</cite> has many functions for analyzing and querying only annotation
+data (which do not require DICOM image data access), <cite>pylidc</cite> also has many
+functions that do require access to the DICOM files associated with the
+LIDC dataset. <cite>pylidc</cite> looks for a special configuration file that tells it
+where DICOM data is located on your system. You can use <cite>pylidc</cite> without
+creating this configuration file, but of course, any functions that depend
+on CT image data will not be usable.</p>
+<p><cite>pylidc</cite> looks in your home folder for a configuration file called,
+<cite>.pylidcrc</cite> on Mac and Linux, or <cite>pylidc.conf</cite> on Windows. You must create
+this file. On Linux and Mac, the file should be located at
+<cite>/home/[user]/.pylidcrc</cite>. On Windows, the file should be located at
+<cite>C:Users[User]pylidc.conf</cite>.</p>
+<p>The configuration file should be formatted as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">dicom</span><span class="p">]</span>
+<span class="n">path</span> <span class="o">=</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">big_external_drive</span><span class="o">/</span><span class="n">datasets</span><span class="o">/</span><span class="n">LIDC</span><span class="o">-</span><span class="n">IDRI</span>
+<span class="n">warn</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>If you want to use <cite>pylidc</cite> without utilizing the DICOM data (for say,
+querying annotation attributes, etc.), you can remove <cite>path</cite> and set
+<cite>warn</cite> to <cite>False</cite> and leave the path undefined,  i.e.,:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">dicom</span><span class="p">]</span>
+<span class="n">warn</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p>and the module won’t bother you about it each time you import the module.</p>
+<p>The DICOM files should be stored in a folder with corresponding <cite>PatientID</cite>
+(i.e., a string of the form <cite>LIDC-IDRI-dddd</cite>, where <cite>dddd</cite> is a string of 4
+integers). <cite>pylidc</cite> looks for a subfolder within:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">big_external_drive</span><span class="o">/</span><span class="n">datasets</span><span class="o">/</span><span class="n">LIDC</span><span class="o">-</span><span class="n">IDRI</span><span class="o">/</span><span class="n">LIDC</span><span class="o">-</span><span class="n">dddd</span>
+</pre></div>
+</div>
+<p>for DICOM files that match the <cite>SeriesInstanceUID</cite> and
+<cite>StudyInstanceUID</cite> of the particular scan being requested.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and setup</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tuts/scan.html">The Scan class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/annotation.html">The Annotation class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/consensus.html">Consolidation of multiple annotations of a single nodule</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="scan.html">Scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="annotation.html">Annotation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">pylidc</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tuts/scan.html"
+                        title="next chapter">The Scan class</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tuts/scan.html" title="The Scan class"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="pylidc"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Matt Hancock.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

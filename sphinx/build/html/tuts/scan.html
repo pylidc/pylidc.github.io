@@ -1,0 +1,202 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>The Scan class &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Annotation class" href="annotation.html" />
+    <link rel="prev" title="Installation and setup" href="../install.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="annotation.html" title="The Annotation class"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../install.html" title="Installation and setup"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-scan-class">
+<h1>The Scan class<a class="headerlink" href="#the-scan-class" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="../scan.html#pylidc.Scan" title="pylidc.Scan"><code class="xref py py-class docutils literal notranslate"><span class="pre">pylidc.Scan</span></code></a> class holds some (but not all!) of the DICOM
+attributes associated with the CT scans in the LIDC dataset. These attributes
+can be used to query the data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+
+<span class="c1"># Query for all CT scans with desired traits.</span>
+<span class="n">scans</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">slice_thickness</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">pixel_spacing</span> <span class="o">&lt;=</span> <span class="mf">0.6</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">scans</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="c1"># =&gt; 31</span>
+
+<span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;LIDC-IDRI-0078&#39;</span>
+<span class="n">scan</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">patient_id</span> <span class="o">==</span> <span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Not all of the class attributes are queryable! Some attributes
+are actually <em>computed</em> properties. You can determine this by, for example,
+examining the object type for the class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">slice_thickness</span><span class="p">))</span>
+<span class="c1"># =&gt; &lt;class &#39;sqlalchemy.orm.attributes.InstrumentedAttribute&#39;&gt;</span>
+<span class="c1"># =&gt; ^^^ queryable because it&#39;s an sqlalchemy attribute.</span>
+
+<span class="c1"># Whereas ...</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">slice_spacing</span><span class="p">))</span>
+<span class="c1"># =&gt; &lt;type &#39;property&#39;&gt;</span>
+<span class="c1"># ^^^ not queryable because it&#39;s a computed property</span>
+</pre></div>
+</div>
+<p class="last">The <cite>slice_thickness</cite> attribute corresponds to the DICOM attribute
+(0018,0050), whereas the <cite>slice_spacing</cite> attribute is computed from
+the median of spacing between the slices
+(see <a class="reference internal" href="../scan.html#pylidc.Scan.slice_zvals" title="pylidc.Scan.slice_zvals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.Scan.slice_zvals()</span></code></a>).</p>
+</div>
+<p>A <a class="reference internal" href="../scan.html#pylidc.Scan" title="pylidc.Scan"><code class="xref py py-class docutils literal notranslate"><span class="pre">pylidc.Scan</span></code></a> object has zero or more <a class="reference internal" href="../annotation.html#pylidc.Annotation" title="pylidc.Annotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">pylidc.Annotation</span></code></a>
+objects, which are radiologist annotations of lung nodules found in the scan:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scan</span><span class="o">.</span><span class="n">annotations</span><span class="p">))</span>
+<span class="c1"># =&gt; 13</span>
+</pre></div>
+</div>
+<p>The scan has 13 annotations, but which refer to the same nodule? This can
+be determined using the <a class="reference internal" href="../scan.html#pylidc.Scan.cluster_annotations" title="pylidc.Scan.cluster_annotations"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.Scan.cluster_annotations()</span></code></a> method, which
+uses a distance function to create an adjancency graph to determine which
+annotations refer to the same nodule in a scan:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nods</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">cluster_annotations</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> has </span><span class="si">%d</span><span class="s2"> nodules.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">scan</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nods</span><span class="p">)))</span>
+<span class="c1"># =&gt; Scan(id=1,patient_id=LIDC-IDRI-0078) has 4 nodules.</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">nod</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nods</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nodule </span><span class="si">%d</span><span class="s2"> has </span><span class="si">%d</span><span class="s2"> annotations.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nods</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+<span class="c1"># =&gt; Nodule 1 has 4 annotations.</span>
+<span class="c1"># =&gt; Nodule 2 has 4 annotations.</span>
+<span class="c1"># =&gt; Nodule 3 has 1 annotations.</span>
+<span class="c1"># =&gt; Nodule 4 has 4 annotations.</span>
+</pre></div>
+</div>
+<p>The scan can be converted to a NumPy array for image-processing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vol</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">to_volume</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="c1"># =&gt; (512, 512, 87)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">vol</span><span class="o">.</span><span class="n">std</span><span class="p">()))</span>
+<span class="c1"># =&gt; -702.15, 812.52</span>
+</pre></div>
+</div>
+<p>An interactive GUI can be engaged, with clustered annotations optionally
+indicated with arrows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scan</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">annotation_groups</span><span class="o">=</span><span class="n">nods</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which appears like</p>
+<a class="reference external image-reference" href="../_images/scan_visualize.png"><img alt="../_images/scan_visualize.png" src="../_images/scan_visualize.png" /></a>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta information</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation and setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The Scan class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="annotation.html">The Annotation class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">Annotation Consensus</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Full API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scan.html">Scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation.html">Annotation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contour.html">Contour</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../install.html"
+                        title="previous chapter">Installation and setup</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="annotation.html"
+                        title="next chapter">The Annotation class</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tuts/scan.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="annotation.html" title="The Annotation class"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../install.html" title="Installation and setup"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Matt Hancock.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

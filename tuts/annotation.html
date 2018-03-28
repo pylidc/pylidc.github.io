@@ -1,0 +1,285 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>The Annotation class &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Annotation Consensus" href="consensus.html" />
+    <link rel="prev" title="The Scan class" href="scan.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="consensus.html" title="Annotation Consensus"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="scan.html" title="The Scan class"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-annotation-class">
+<h1>The Annotation class<a class="headerlink" href="#the-annotation-class" title="Permalink to this headline">¶</a></h1>
+<p>A <a class="reference internal" href="../annotation.html#pylidc.Annotation" title="pylidc.Annotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">pylidc.Annotation</span></code></a> object belongs to a <a class="reference internal" href="../scan.html#pylidc.Scan" title="pylidc.Scan"><code class="xref py py-class docutils literal notranslate"><span class="pre">pylidc.Scan</span></code></a> object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">patient_id</span><span class="p">)</span>
+<span class="c1"># =&gt; LIDC-IDRI-0078</span>
+</pre></div>
+</div>
+<div class="section" id="querying-and-assigned-characteristic-values">
+<h2>Querying and assigned characteristic values<a class="headerlink" href="#querying-and-assigned-characteristic-values" title="Permalink to this headline">¶</a></h2>
+<p>The queryable attributes for <cite>Annotation</cite> objects are the characteristic
+values assigned by the particular annotating radiologist:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">anns</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">spiculation</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span>
+                                      <span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">malignancy</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">anns</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="c1"># =&gt; 91</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Not all of the class attributes are queryable! Some attributes
+are actually <em>computed</em> properties. You can determine this by, for example,
+examining the object type for the class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">lobulation</span><span class="p">))</span>
+<span class="c1"># =&gt; &lt;class &#39;sqlalchemy.orm.attributes.InstrumentedAttribute&#39;&gt;</span>
+<span class="c1"># =&gt; ^^^ queryable because it&#39;s an sqlalchemy attribute.</span>
+
+<span class="c1"># Whereas ...</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">Lobulation</span><span class="p">))</span>
+<span class="c1"># =&gt; &lt;type &#39;property&#39;&gt;</span>
+<span class="c1"># ^^^ not queryable because it&#39;s a computed property</span>
+</pre></div>
+</div>
+<p class="last">The <cite>lobulation</cite> attribute is the numerical value assigned by the
+annotating radiologist, whereas the <cite>Lobulation</cite> attribute is a property
+that encodes the numerical value to the semantic string representation.</p>
+</div>
+<p>Each of the characteristic values are the numerical values assigned by
+the annotating radiologist. Alongside each of these attributes is a
+corresponding computed property that gives the semantic interpretation
+of the numerical value for a given characteristic:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span>\
+      <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">malignancy</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">malignancy</span><span class="p">,</span> <span class="n">ann</span><span class="o">.</span><span class="n">Malignancy</span><span class="p">)</span>
+<span class="c1"># =&gt; 5, &#39;Highly Suspicious&#39;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">margin</span><span class="p">,</span> <span class="n">ann</span><span class="o">.</span><span class="n">Margin</span><span class="p">)</span>
+<span class="c1"># =&gt; 2, &#39;Near Poorly Defined&#39;</span>
+</pre></div>
+</div>
+<p>The names of these characteristics are found in
+<cite>pl.annotation_feature_names</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="s1">&#39;subtlety&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;internalStructure&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;calcification&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;margin&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;lobulation&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;spiculation&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;texture&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;malignancy&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All of these characteristics values and strings can be quickly viewed by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ann</span><span class="o">.</span><span class="n">print_formatted_feature_table</span><span class="p">()</span>
+<span class="c1"># =&gt; Feature              Meaning                    #</span>
+<span class="c1"># =&gt; -                    -                          -</span>
+<span class="c1"># =&gt; Subtlety           | Obvious                  | 5</span>
+<span class="c1"># =&gt; Internalstructure  | Soft Tissue              | 1</span>
+<span class="c1"># =&gt; Calcification      | Absent                   | 6</span>
+<span class="c1"># =&gt; Sphericity         | Ovoid/Round              | 4</span>
+<span class="c1"># =&gt; Margin             | Near Poorly Defined      | 2</span>
+<span class="c1"># =&gt; Lobulation         | Near Marked Lobulation   | 4</span>
+<span class="c1"># =&gt; Spiculation        | No Spiculation           | 1</span>
+<span class="c1"># =&gt; Texture            | Solid                    | 5</span>
+<span class="c1"># =&gt; Malignancy         | Highly Suspicious        | 5</span>
+</pre></div>
+</div>
+<p>We can also query directly for the attributes themselves, rather
+than the entire Annotation object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">svals</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">spiculation</span><span class="p">)</span>
+<span class="n">svals</span> <span class="o">=</span> <span class="n">anns</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">spiculation</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">svals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="c1"># =&gt; (4,)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sval</span><span class="p">]))</span>
+<span class="c1"># =&gt; True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="contour-data">
+<h2>Contour data<a class="headerlink" href="#contour-data" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="../contour.html#pylidc.Contour" title="pylidc.Contour"><code class="xref py py-class docutils literal notranslate"><span class="pre">pylidc.Contour</span></code></a> class is almost never used directly, but only
+through the <a class="reference internal" href="../annotation.html#pylidc.Annotation" title="pylidc.Annotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">pylidc.Annotation</span></code></a> object to which the contours belong.
+They can be accessed directly, however, via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">contours</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">contours</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">contours</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="c1"># =&gt; Contour(id=21,annotation_id=4)</span>
+</pre></div>
+</div>
+<p>The <cite>diameter</cite>, <cite>surface_area</cite>, and <cite>volume</cite> attributes are
+all, for example, computed properties that use the contour data
+for a particular Annotation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># units: mm, mm^2, mm^3</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">diameter</span><span class="p">,</span> <span class="n">ann</span><span class="o">.</span><span class="n">surface_area</span><span class="p">,</span> <span class="n">ann</span><span class="o">.</span><span class="n">volume</span><span class="p">))</span>
+<span class="c1"># =&gt; 32.81, 2228.53, 5230.34</span>
+</pre></div>
+</div>
+<p>The contour data are also used to compute the bounding box indices of an
+annotation. The <cite>bbox</cite> returns a tuple of slices corresponding to the nodule
+bounding box indices. This can be used to easily index into the
+scan NumPy volume:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bbox</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+<span class="c1"># =&gt; (slice(151, 185, None), slice(349, 376, None), slice(44, 50, None))</span>
+
+<span class="n">vol</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">to_volume</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">vol</span><span class="p">[</span><span class="n">bbox</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="c1"># =&gt; (34, 27, 6)</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="../annotation.html#pylidc.Annotation.bbox" title="pylidc.Annotation.bbox"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.Annotation.bbox()</span></code></a> function accepts a <cite>pad</cite> argument which
+is quite flexible for adding context about the nodule.</p>
+<p>We can also get the physical dimensions of the bounding box:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">bbox_dims</span><span class="p">())</span>
+<span class="c1"># =&gt; [21.45, 16.90, 15.0]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="annotation-visualization">
+<h2>Annotation visualization<a class="headerlink" href="#annotation-visualization" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="d-visualization">
+<h3>3D visualization<a class="headerlink" href="#d-visualization" title="Permalink to this headline">¶</a></h3>
+<p>The nodule surface (as obtained by a single annotator) can be visualized in
+three dimensions by invoking the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span>\
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">lobulation</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">ann</span><span class="o">.</span><span class="n">visualize_in_3d</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>which appears as:</p>
+<a class="reference external image-reference" href="../_images/annotation3d.png"><img alt="../_images/annotation3d.png" src="../_images/annotation3d.png" /></a>
+</div>
+<div class="section" id="ct-visualization">
+<h3>CT visualization<a class="headerlink" href="#ct-visualization" title="Permalink to this headline">¶</a></h3>
+<p>The contours can be visualized interactively on top of the CT image data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">ann</span><span class="o">.</span><span class="n">visualize_in_scan</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>which appears as:</p>
+<a class="reference external image-reference" href="../_images/annotation_viz_in_scan.png"><img alt="../_images/annotation_viz_in_scan.png" src="../_images/annotation_viz_in_scan.png" /></a>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta information</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation and setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scan.html">The Scan class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The Annotation class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">Annotation Consensus</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Full API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scan.html">Scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation.html">Annotation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contour.html">Contour</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="scan.html"
+                        title="previous chapter">The Scan class</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="consensus.html"
+                        title="next chapter">Annotation Consensus</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tuts/annotation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="consensus.html" title="Annotation Consensus"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="scan.html" title="The Scan class"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Matt Hancock.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

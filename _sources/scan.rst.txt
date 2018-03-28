@@ -1,5 +1,5 @@
-The Scan Model
-==============
+Scan
+====
 
 .. autoclass:: pylidc.Scan
     :members:

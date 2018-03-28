@@ -1,5 +1,5 @@
-The Annotation Model
-====================
+Annotation
+==========
 
 .. autoclass:: pylidc.Annotation
     :members:
