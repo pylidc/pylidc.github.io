@@ -96,7 +96,8 @@ the annotating radiologist. Alongside each of these attributes is a
 corresponding computed property that gives the semantic interpretation
 of the numerical value for a given characteristic:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span>\
-      <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">malignancy</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">malignancy</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">malignancy</span><span class="p">,</span> <span class="n">ann</span><span class="o">.</span><span class="n">Malignancy</span><span class="p">)</span>
 <span class="c1"># =&gt; 5, &#39;Highly Suspicious&#39;</span>
 
@@ -134,13 +135,13 @@ of the numerical value for a given characteristic:</p>
 </div>
 <p>We can also query directly for the attributes themselves, rather
 than the entire Annotation object:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">svals</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">spiculation</span><span class="p">)</span>
-<span class="n">svals</span> <span class="o">=</span> <span class="n">anns</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">spiculation</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">svals</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">spiculation</span><span class="p">)</span>\
+          <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">spiculation</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">svals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="c1"># =&gt; (4,)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sval</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">svals</span><span class="p">]))</span>
 <span class="c1"># =&gt; True</span>
 </pre></div>
 </div>
@@ -154,7 +155,7 @@ They can be accessed directly, however, via:</p>
 <span class="n">contours</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">contours</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">contours</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="c1"># =&gt; Contour(id=21,annotation_id=4)</span>
+<span class="c1"># =&gt; Contour(id=21,annotation_id=1)</span>
 </pre></div>
 </div>
 <p>The <cite>diameter</cite>, <cite>surface_area</cite>, and <cite>volume</cite> attributes are
@@ -163,7 +164,7 @@ for a particular Annotation:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2"> mm, </span><span class="si">%.2f</span><span class="s2"> mm^2, </span><span class="si">%.2f</span><span class="s2"> mm^3&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">diameter</span><span class="p">,</span>
                                          <span class="n">ann</span><span class="o">.</span><span class="n">surface_area</span><span class="p">,</span>
                                          <span class="n">ann</span><span class="o">.</span><span class="n">volume</span><span class="p">))</span>
-<span class="c1"># =&gt; 32.81 mm, 2228.53 mm^2, 5230.34 mm^3</span>
+<span class="c1"># =&gt; 20.84 mm, 1242.74 mm^2, 2439.30 mm^3</span>
 </pre></div>
 </div>
 <p>A boolean-valued volume can be obtained that is 1 to indicate nodule and 0

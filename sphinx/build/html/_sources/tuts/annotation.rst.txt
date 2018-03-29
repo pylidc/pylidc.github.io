@@ -49,7 +49,8 @@ corresponding computed property that gives the semantic interpretation
 of the numerical value for a given characteristic::
     
     ann = pl.query(pl.Annotation)\
-          .filter(pl.Annotation.malignancy == 5).first()
+            .filter(pl.Annotation.malignancy == 5).first()
+
     print(ann.malignancy, ann.Malignancy)
     # => 5, 'Highly Suspicious'
 
@@ -87,13 +88,13 @@ All of these characteristics values and strings can be quickly viewed by::
 We can also query directly for the attributes themselves, rather 
 than the entire Annotation object::
     
-    svals = pl.query(pl.Annotation.spiculation)
-    svals = anns.filter(pl.Annotation.spiculation > 3)
+    svals = pl.query(pl.Annotation.spiculation)\
+              .filter(pl.Annotation.spiculation > 3)
 
     print(svals[0])
     # => (4,)
 
-    print(all([s[0] > 3 for s in sval]))
+    print(all([s[0] > 3 for s in svals]))
     # => True
 
 Contour-derived data
@@ -107,7 +108,7 @@ They can be accessed directly, however, via::
     contours = ann.contours
 
     print(contours[0])
-    # => Contour(id=21,annotation_id=4)
+    # => Contour(id=21,annotation_id=1)
 
 The `diameter`, `surface_area`, and `volume` attributes are
 all, for example, computed properties that use the contour data
@@ -116,7 +117,7 @@ for a particular Annotation::
     print("%.2f mm, %.2f mm^2, %.2f mm^3" % (ann.diameter,
                                              ann.surface_area,
                                              ann.volume))
-    # => 32.81 mm, 2228.53 mm^2, 5230.34 mm^3
+    # => 20.84 mm, 1242.74 mm^2, 2439.30 mm^3
 
 A boolean-valued volume can be obtained that is 1 to indicate nodule and 0 
 to indicate non-nodule::

@@ -143,7 +143,10 @@ Each result is a 1-tuple whose element is a string of `Annotation` ids,
 separated by commas. We can assert that the feature values are indeed identical
 in a particular group::
 
-    for id in groups[0].split(','):
+    # Id's for the first group:
+    ids = groups[0][0].split(',')
+
+    for id in ids:
         ann = pl.query(pl.Annotation).get(id)
         print(ann.feature_vals())
     # => [1 1 3 3 5 1 1 5 1]
@@ -165,7 +168,7 @@ feature values are::
     i = np.argmax(group_sizes)
     
     # Grab the first id in the maximum sized group, for no particular reason.
-    id = int(groups[i][0].split(',')[0])
+    id = groups[i][0].split(',')[0]
     
     ann = pl.query(pl.Annotation).get(id)
     ann.print_formatted_feature_table()
@@ -188,7 +191,7 @@ the variance of the each feature value computed over all annotations in the
 group::
 
     # Fetch the feature values for all annotations in the group
-    ids = [int(id) for id in groups[i][0].split(',')]
+    ids = [id for id in groups[i][0].split(',')]
     
     fvals = pl.query(*all_features)\
               .filter(pl.Annotation.id.in_( ids )).all()
