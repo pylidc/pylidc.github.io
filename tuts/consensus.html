@@ -32,6 +32,9 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="advanced-queries.html" title="Advanced queries"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -48,7 +51,7 @@
             
   <div class="section" id="annotation-consensus">
 <h1>Annotation consensus<a class="headerlink" href="#annotation-consensus" title="Permalink to this headline">¶</a></h1>
-<p>The <a class="reference internal" href="../consensus.html#pylidc.utils.consensus" title="pylidc.utils.consensus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.utils.consensus()</span></code></a> utility accepts a list of annotations to
+<p>The <a class="reference internal" href="../utils.html#pylidc.utils.consensus" title="pylidc.utils.consensus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.utils.consensus()</span></code></a> utility accepts a list of annotations to
 produce a single boolean-valued volume of those annotations. It also returns
 the individual boolean masks for each Annotation, placed in a common frame of
 reference – i.e., a common bounding box, which is also returned.</p>
@@ -61,6 +64,7 @@ from the 4 different annotations of the nodule:</p>
 <span class="kn">from</span> <span class="nn">skimage.measure</span> <span class="kn">import</span> <span class="n">find_contours</span>
 
 <span class="kn">import</span> <span class="nn">pylidc</span> <span class="kn">as</span> <span class="nn">pl</span>
+<span class="kn">from</span> <span class="nn">pylidc.utils</span> <span class="kn">import</span> <span class="n">consensus</span>
 
 
 <span class="c1"># Query for a scan, and convert it to an array volume.</span>
@@ -73,8 +77,8 @@ from the 4 different annotations of the nodule:</p>
 
 <span class="c1"># Perform a consensus consolidation and 50% agreement level.</span>
 <span class="c1"># We pad the slices to add context for viewing.</span>
-<span class="n">cmask</span><span class="p">,</span><span class="n">cbbox</span><span class="p">,</span><span class="n">masks</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">consensus</span><span class="p">(</span><span class="n">anns</span><span class="p">,</span> <span class="n">clevel</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-                                 <span class="n">pad</span><span class="o">=</span><span class="p">[(</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)])</span>
+<span class="n">cmask</span><span class="p">,</span><span class="n">cbbox</span><span class="p">,</span><span class="n">masks</span> <span class="o">=</span> <span class="n">consensus</span><span class="p">(</span><span class="n">anns</span><span class="p">,</span> <span class="n">clevel</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                              <span class="n">pad</span><span class="o">=</span><span class="p">[(</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)])</span>
 
 <span class="c1"># Get the central slice of the computed bounding box.</span>
 <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">cbbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">stop</span> <span class="o">-</span> <span class="n">cbbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
@@ -129,7 +133,7 @@ from the 4 different annotations of the nodule:</p>
 <li class="toctree-l1"><a class="reference internal" href="../scan.html">Scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../annotation.html">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contour.html">Contour</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../consensus.html">Annotation Consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">Utilities</a></li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -167,6 +171,9 @@ from the 4 different annotations of the nodule:</p>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="advanced-queries.html" title="Advanced queries"
              >next</a> |</li>

@@ -29,6 +29,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">pylidc  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
@@ -1067,7 +1070,7 @@
 
                 <span class="c1"># Turn the contour closed if it&#39;s not.</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">C</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="c1"># Create path object and test all pixels</span>
                 <span class="c1"># within the contour&#39;s bounding box.</span>
@@ -1431,7 +1434,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../scan.html">Scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../annotation.html">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contour.html">Contour</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../consensus.html">Annotation Consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utilities</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -1456,6 +1459,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">pylidc  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>

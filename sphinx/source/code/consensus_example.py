@@ -4,6 +4,7 @@ import matplotlib.animation as manim
 from skimage.measure import find_contours
 
 import pylidc as pl
+from pylidc.utils import consensus
 
 
 # Query for a scan, and convert it to an array volume.
@@ -16,8 +17,8 @@ anns = nods[0]
 
 # Perform a consensus consolidation and 50% agreement level.
 # We pad the slices to add context for viewing.
-cmask,cbbox,masks = pl.consensus(anns, clevel=0.5,
-                                 pad=[(20,20), (20,20), (0,0)])
+cmask,cbbox,masks = consensus(anns, clevel=0.5,
+                              pad=[(20,20), (20,20), (0,0)])
 
 # Get the central slice of the computed bounding box.
 k = int(0.5*(cbbox[2].stop - cbbox[2].start))
