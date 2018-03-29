@@ -1,7 +1,7 @@
-Annotation Consensus
+Annotation consensus
 ====================
 
-The :meth:`pylidc.consensus` utility accepts a list of annotations to 
+The :meth:`pylidc.utils.consensus` utility accepts a list of annotations to 
 produce a single boolean-valued volume of those annotations. It also returns 
 the individual boolean masks for each Annotation, placed in a common frame of 
 reference -- i.e., a common bounding box, which is also returned.

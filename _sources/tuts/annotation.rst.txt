@@ -9,8 +9,14 @@ A :class:`pylidc.Annotation` object belongs to a :class:`pylidc.Scan` object::
     print(ann.scan.patient_id)
     # => LIDC-IDRI-0078
 
-Querying and assigned characteristic values
--------------------------------------------
+Jump to:
+
+* `Querying annotation feature values`_
+* `Contour-derived data`_
+* `Annotation visualization`_
+
+Querying annotation feature values
+----------------------------------
 
 The queryable attributes for `Annotation` objects are the characteristic
 values assigned by the particular annotating radiologist::
@@ -90,8 +96,8 @@ than the entire Annotation object::
     print(all([s[0] > 3 for s in sval]))
     # => True
 
-Contour data
-------------
+Contour-derived data
+--------------------
 
 The :class:`pylidc.Contour` class is almost never used directly, but only 
 through the :class:`pylidc.Annotation` object to which the contours belong.
@@ -107,14 +113,26 @@ The `diameter`, `surface_area`, and `volume` attributes are
 all, for example, computed properties that use the contour data
 for a particular Annotation::
 
-    # units: mm, mm^2, mm^3
-    print("%.2f, %.2f, %.2f" % (ann.diameter, ann.surface_area, ann.volume))
-    # => 32.81, 2228.53, 5230.34
+    print("%.2f mm, %.2f mm^2, %.2f mm^3" % (ann.diameter,
+                                             ann.surface_area,
+                                             ann.volume))
+    # => 32.81 mm, 2228.53 mm^2, 5230.34 mm^3
 
-The contour data are also used to compute the bounding box indices of an 
-annotation. The `bbox` returns a tuple of slices corresponding to the nodule
-bounding box indices. This can be used to easily index into the 
-scan NumPy volume::
+A boolean-valued volume can be obtained that is 1 to indicate nodule and 0 
+to indicate non-nodule::
+
+    mask = ann.boolean_mask()
+    print(mask.shape, mask.dtype)
+    # => (34, 27, 6), dtype('bool')
+
+Note by the shape of the volume that the boolean-valued mask does not occupy 
+the entire extent of the CT image volume (which is 512 x 512 x num slices). 
+Rather, the boolean mask sits within the computed "bounding box" of the nodule,
+which is the computed extent of the contour indices of the annotation.
+
+The :meth:`pylidc.Annotation.bbox` method returns a tuple of slices
+corresponding to the nodule bounding box indices. This can be used to 
+easily index into the NumPy CT image volume::
 
     bbox = ann.bbox()
     print(bbox)
@@ -124,8 +142,9 @@ scan NumPy volume::
     print(vol[bbox].shape)
     # => (34, 27, 6)
 
-The :meth:`pylidc.Annotation.bbox` function accepts a `pad` argument which 
-is quite flexible for adding context about the nodule.
+Note that both the :meth:`pylidc.Annotation.boolean_mask` and the 
+:meth:`pylidc.Annotation.bbox` methods accept a `pad` argument which 
+can be used for adding context about the nodule.
 
 We can also get the physical dimensions of the bounding box::
 
@@ -135,8 +154,21 @@ We can also get the physical dimensions of the bounding box::
 Annotation visualization
 ------------------------
 
-3D visualization
-~~~~~~~~~~~~~~~~
+The :class:`pylidc.Annotation` class provides two direct convenience functions 
+for visualization annotation data which we will show below; however, 
+let's first continue the 
+:meth:`pylidc.Annotation.boolean_mask` and 
+:meth:`pylidc.Annotation.bbox` examples from above to provide a  
+visualization of the annotated nodule:
+
+.. literalinclude:: /code/ann_mask_bbox_example.py
+    :language: python
+
+.. image:: /images/mask_bbox.png
+    :target: ../_images/mask_bbox.png
+
+Surface visualization
+~~~~~~~~~~~~~~~~~~~~~
 
 The nodule surface (as obtained by a single annotator) can be visualized in 
 three dimensions by invoking the following::

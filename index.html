@@ -44,26 +44,52 @@
             
   <div class="section" id="pylidc">
 <h1>pylidc<a class="headerlink" href="#pylidc" title="Permalink to this headline">¶</a></h1>
-<p><cite>pylidc</cite> is an <a class="reference external" href="https://en.wikipedia.org/wiki/Object-relational_mapping">Object-relational mapping</a> for the data provided in the <a class="reference external" href="https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI">LIDC dataset</a>. This means that the data can be queried in SQL-like fashion, and also that the data are also <a class="reference external" href="https://en.wikipedia.org/wiki/Object-oriented_programming">objects</a> that add additional functionality via functions that act on instances of the queried data.</p>
+<p><a class="reference external" href="https://github.com/pylidc/pylidc">pylidc</a> is an <a class="reference external" href="https://en.wikipedia.org/wiki/Object-relational_mapping">Object-relational mapping</a>
+(using <a class="reference external" href="https://www.sqlalchemy.org/">SQLAlchemy</a>) for the data provided
+in the <a class="reference external" href="https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI">LIDC dataset</a>. This
+means that the data can be queried in SQL-like fashion, and that
+the data are also <a class="reference external" href="https://en.wikipedia.org/wiki/Object-oriented_programming">objects</a> that add
+additional functionality via functions that act on
+instances of data obtained by querying for particular attributes.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="meta.html">Meta information</a></li>
 </ul>
 </div>
-<table border="1" class="docutils">
-<colgroup>
-<col width="50%" />
-<col width="50%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="_images/scan_visualize.png"><img alt="img1" src="_images/scan_visualize.png" style="width: 320.0px; height: 178.6px;" /></a></td>
-<td><a class="reference internal" href="_images/consensus.png"><img alt="img2" src="_images/consensus.png" style="width: 244.5px; height: 217.0px;" /></a></td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="_images/annotation3d.png"><img alt="img3" src="_images/annotation3d.png" style="width: 215.0px; height: 228.0px;" /></a></td>
-<td>&#160;</td>
-</tr>
-</tbody>
-</table>
+<p>Jump to:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#tutorials">Tutorials</a></li>
+<li><a class="reference internal" href="#full-api">Full API</a></li>
+</ul>
+<hr class="docutils" />
+<table style="width:100%; max-width: 500px;">
+    <tr>
+        <td style="width: 50%;">
+            <a href="tuts/scan.html#scan-visualization">
+                <img alt="Interactive scan visualization" title="Interactive scan visualization" src="_images/scan_visualize.png">
+            </a>
+        </td>
+        <td style="width: 50%;">
+            <a href="tuts/annotation.html#surface-visualization">
+                <img alt="3D nodule surface visualization" title="3D nodule surface visualization" src="_images/annotation3d.png">
+            </a>
+        </td>
+    </tr>
+
+    <tr>
+        <td style="width: 50%;">
+            <a href="tuts/consensus.html">
+                <img alt="Consensus consolidation of multiple annotations" title="Consensus consolidation of multiple annotations" src="_images/consensus.png">
+            </a>
+        </td>
+        <td style="width: 50%;">
+            <a href="tuts/annotation.html#annotation-visualization">
+                <img alt="Annotation contour conversion to boolean mask" title="Annotation contour conversion to boolean mask" src="_images/mask_bbox.png">
+            </a>
+        </td>
+    </tr>
+</table><hr class="docutils" />
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>The module and its dependencies can be installed via <cite>pip install pylidc</cite>.</p>
@@ -77,12 +103,15 @@ for CT DICOM data can be found here:</p>
 </div>
 <div class="section" id="tutorials">
 <h2>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h2>
+<p>The following tutorials sections provide a quick introduction to various
+aspects of the <cite>pylidc</cite> module:</p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tuts/scan.html">The Scan class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuts/annotation.html">The Annotation class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuts/consensus.html">Annotation Consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/consensus.html">Annotation consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/advanced-queries.html">Advanced queries</a></li>
 </ul>
 </div>
 </div>
@@ -96,6 +125,7 @@ attributes are given here:</p>
 <li class="toctree-l1"><a class="reference internal" href="scan.html">Scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotation.html">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">Annotation Consensus</a></li>
 </ul>
 </div>
 </div>
@@ -118,13 +148,15 @@ attributes are given here:</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tuts/scan.html">The Scan class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuts/annotation.html">The Annotation class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuts/consensus.html">Annotation Consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/consensus.html">Annotation consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/advanced-queries.html">Advanced queries</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Full API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="scan.html">Scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotation.html">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">Annotation Consensus</a></li>
 </ul>
 
   <h4>Next topic</h4>

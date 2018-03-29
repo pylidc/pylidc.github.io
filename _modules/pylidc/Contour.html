@@ -52,9 +52,11 @@
 
 <div class="viewcode-block" id="Contour"><a class="viewcode-back" href="../../contour.html#pylidc.Contour">[docs]</a><span class="k">class</span> <span class="nc">Contour</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The Contour class holds the coordinate data for the vertices of</span>
-<span class="sd">    a :class:`pylidc.Annotation` object for a single slice in the CT volume.</span>
+<span class="sd">    The Contour class holds the nodule boundary coordinate data of a </span>
+<span class="sd">    :class:`pylidc.Annotation` object for a single slice in the CT volume.</span>
 
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
 <span class="sd">    inclusion: bool</span>
 <span class="sd">        If True, the area inside the contour is included as part of </span>
 <span class="sd">        the nodule. If False, the area inside the contour is excluded </span>
@@ -62,11 +64,11 @@
 
 <span class="sd">    image_z_position: float</span>
 <span class="sd">        This is the `imageZposition` defined via the xml annnotations </span>
-<span class="sd">        for this contour. It is the z-coordinate of dicom </span>
-<span class="sd">        attribute, `(0020,0032)`.</span>
+<span class="sd">        for this contour. It is the z-coordinate of DICOM </span>
+<span class="sd">        attribute (0020,0032).</span>
 <span class="sd">    </span>
 <span class="sd">    dicom_file_name: string</span>
-<span class="sd">        This is the name of the corresponding dicom file for the scan </span>
+<span class="sd">        This is the name of the corresponding DICOM file for the scan </span>
 <span class="sd">        to which this contour belongs, having the same `image_z_position`.</span>
 
 <span class="sd">    coords: string</span>
@@ -75,18 +77,24 @@
 <span class="sd">        `to_matrix` method, which returns a numpy array rather than </span>
 <span class="sd">        a string.</span>
 
-<span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; import pylidc as pl</span>
-<span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
-<span class="sd">        &gt;&gt;&gt;</span>
-<span class="sd">        &gt;&gt;&gt; ann = pl.query(pl.Annotation).first()</span>
-<span class="sd">        &gt;&gt;&gt; vol = ann.scan.to_volume()</span>
-<span class="sd">        &gt;&gt;&gt; ii,jj = ann.contours[0].to_matrix(include_k=False).T</span>
-<span class="sd">        &gt;&gt;&gt; </span>
-<span class="sd">        &gt;&gt;&gt; plt.imshow(vol[:,:,46], cmap=plt.cm.gray)</span>
-<span class="sd">        &gt;&gt;&gt; plt.plot(jj, ii, &#39;-r&#39;, lw=1, label=&quot;Nodule Boundary&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.legend()</span>
-<span class="sd">        &gt;&gt;&gt; plt.show()</span>
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    Plotting a contour on top of the image volume::</span>
+
+<span class="sd">        import pylidc as pl</span>
+<span class="sd">        import matplotlib.pyplot as plt</span>
+<span class="sd">        </span>
+<span class="sd">        ann = pl.query(pl.Annotation).first()</span>
+<span class="sd">        vol = ann.scan.to_volume()</span>
+<span class="sd">        con = ann.contours[3]</span>
+<span class="sd">        </span>
+<span class="sd">        k = con.image_k_position</span>
+<span class="sd">        ii,jj = ann.contours[3].to_matrix(include_k=False).T</span>
+<span class="sd">        </span>
+<span class="sd">        plt.imshow(vol[:,:,46], cmap=plt.cm.gray)</span>
+<span class="sd">        plt.plot(jj, ii, &#39;-r&#39;, lw=1, label=&quot;Nodule Boundary&quot;)</span>
+<span class="sd">        plt.legend()</span>
+<span class="sd">        plt.show()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">__tablename__</span>    <span class="o">=</span> <span class="s1">&#39;contours&#39;</span>
     <span class="nb">id</span>               <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -108,18 +116,30 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">Contour</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">image_k_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Similar to `Contour.image_z_position`, but returns the index</span>
+<span class="sd">        instead of the z coordinate value.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        This index may not be unique if the `slice_zvals` of the respective</span>
+<span class="sd">        scan are not unique.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">zs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_zvals</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zs</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">image_z_position</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">k</span>
+
 <div class="viewcode-block" id="Contour.to_matrix"><a class="viewcode-back" href="../../contour.html#pylidc.Contour.to_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">to_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_k</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the contour-annotation coordinates as a matrix where </span>
 <span class="sd">        each row contains an (i,j,k) *index* coordinate into the image volume.</span>
-<span class="sd">        </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        include_k: bool, default=True</span>
-<span class="sd">            Set `include_k=False` to omit the `k` axis coordinate. In this </span>
-<span class="sd">            case, each row of the returned matrix is an (i,j) *index* </span>
-<span class="sd">            coordinate into the `k`th image. The index `k` can be </span>
-<span class="sd">            recovered via:</span>
-<span class="sd">                z = contour.image_z_position</span>
-<span class="sd">                k = contour.annotation.contour_slice_indexes[z]</span>
+<span class="sd">            Set `include_k=False` to omit the `k` axis coordinate. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># The reversal [::-1] is because the coordinates from the LIDC XML</span>
         <span class="c1"># are stored as (x,y), not (i,j).</span>
@@ -128,10 +148,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">include_k</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ij</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">k</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ij</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">k</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ij</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">image_k_position</span>
             <span class="n">zs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">contour_slice_zvals</span>
-            <span class="n">kk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zs</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">image_z_position</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
-            <span class="n">k</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">contour_slice_indices</span><span class="p">[</span><span class="n">kk</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">ij</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span></div></div>
     
 <span class="n">Annotation</span><span class="o">.</span><span class="n">contours</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;Contour&#39;</span><span class="p">,</span>
@@ -155,13 +173,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../tuts/scan.html">The Scan class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuts/annotation.html">The Annotation class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuts/consensus.html">Annotation Consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuts/consensus.html">Annotation consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuts/advanced-queries.html">Advanced queries</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Full API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../scan.html">Scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../annotation.html">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../consensus.html">Annotation Consensus</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">

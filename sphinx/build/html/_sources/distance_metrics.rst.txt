@@ -1,0 +1,5 @@
+Annotation Distance Metrics
+===========================
+
+.. currentmodule:: pylidc
+.. automodule:: pylidc.annotation_distance_metrics

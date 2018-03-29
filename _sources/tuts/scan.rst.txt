@@ -41,6 +41,9 @@ objects, which are radiologist annotations of lung nodules found in the scan::
     print(len(scan.annotations))
     # => 13
 
+Annotation clustering
+---------------------
+
 The scan has 13 annotations, but which refer to the same nodule? This can 
 be determined using the :meth:`pylidc.Scan.cluster_annotations` method, which 
 uses a distance function to create an adjancency graph to determine which 
@@ -58,6 +61,9 @@ annotations refer to the same nodule in a scan::
     # => Nodule 3 has 1 annotations.
     # => Nodule 4 has 4 annotations.
 
+Converting scan image values to NumPy array
+-------------------------------------------
+
 The scan can be converted to a NumPy array for image-processing::
     
     vol = scan.to_volume()
@@ -66,6 +72,9 @@ The scan can be converted to a NumPy array for image-processing::
 
     print("%.2f, %.2f" % (vol.mean(), vol.std()))
     # => -702.15, 812.52
+
+Scan visualization
+------------------
 
 An interactive GUI can be engaged, with clustered annotations optionally
 indicated with arrows::

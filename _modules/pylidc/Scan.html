@@ -110,13 +110,17 @@
 <span class="sd">    ==========</span>
 
 <span class="sd">    study_instance_uid: string</span>
+<span class="sd">        DICOM attribute (0020,000D).</span>
+
 <span class="sd">    series_instance_uid: string </span>
+<span class="sd">        DICOM attribute (0020,000E).</span>
 
 <span class="sd">    patient_id: string</span>
-<span class="sd">        Identifier of the from `LIDC-IDRI-####`</span>
+<span class="sd">        Identifier of the form &quot;LIDC-IDRI-dddd&quot; where dddd is a string of </span>
+<span class="sd">        integers.</span>
 
 <span class="sd">    slice_thickness: float</span>
-<span class="sd">        DICOM attribute, `(0018,0050)`. Note that this may not be </span>
+<span class="sd">        DICOM attribute (0018,0050). Note that this may not be </span>
 <span class="sd">        equal to the `slice_spacing` attribute (see below).</span>
 
 <span class="sd">    slice_zvals: ndarray</span>
@@ -125,17 +129,20 @@
 <span class="sd">        as a NumPy array sorted in increasing order.</span>
 
 <span class="sd">    slice_spacing: float</span>
-<span class="sd">        This computes the median of the difference</span>
+<span class="sd">        This computed property is the median of the difference</span>
 <span class="sd">        between the slice coordinates, i.e., `scan.slice_zvals`.</span>
-<span class="sd">        NOTE: that this attribute is typically (but not always!) the</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        This attribute is typically (but not always!) the</span>
 <span class="sd">        same as the `slice_thickness` attribute. Furthermore,</span>
 <span class="sd">        the `slice_spacing` does NOT necessarily imply that all the </span>
 <span class="sd">        slices are spaced with spacing (although they often are).</span>
 
 <span class="sd">    pixel_spacing: float</span>
-<span class="sd">        Dicom attribute, `(0028,0030)`. This is normally two </span>
+<span class="sd">        Dicom attribute (0028,0030). This is normally two </span>
 <span class="sd">        values. All scans in the LIDC have equal resolutions </span>
-<span class="sd">        in the transverse plane, so only one value is taken here.</span>
+<span class="sd">        in the transverse plane, so only one value is used here.</span>
 
 <span class="sd">    contrast_used: bool</span>
 <span class="sd">        If the DICOM file for the scan had any Contrast tag, </span>
@@ -146,24 +153,27 @@
 <span class="sd">        part of the initial 399 release.</span>
 
 <span class="sd">    sorted_dicom_file_names: string</span>
-<span class="sd">        This attribute is no longer used, but left for historical</span>
-<span class="sd">        reasons. This is a string containing a comma-separated list </span>
-<span class="sd">        like `[number].dcm`. It is a list of the dicom file </span>
-<span class="sd">        names for this scan in order of increasing z-coordinate </span>
-<span class="sd">        of dicom attribute, `(0020,0032)`. In rare cases where </span>
-<span class="sd">        a scan includes multiple files with the same z-coordinate, </span>
-<span class="sd">        the one with the lesser `InstanceNumber` is used.</span>
+<span class="sd">        This attribute is no longer used, and can be ignored.</span>
 
-<span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; import pylidc as pl</span>
-<span class="sd">        &gt;&gt;&gt; qu = pl.query(pl.Scan).filter(pl.Scan.slice_thickness &lt;= 1)</span>
-<span class="sd">        &gt;&gt;&gt; print(qu.count())</span>
-<span class="sd">        &gt;&gt;&gt; # =&gt; 97</span>
-<span class="sd">        &gt;&gt;&gt; scan = qu.first()</span>
-<span class="sd">        &gt;&gt;&gt; print(scan.patient_id, scan.pixel_spacing, scan.slice_thickness)</span>
-<span class="sd">        &gt;&gt;&gt; # =&gt; LIDC-IDRI-0066, 0.63671875, 0.6</span>
-<span class="sd">        &gt;&gt;&gt; print(len(scan.annotations))</span>
-<span class="sd">        &gt;&gt;&gt; # =&gt; 11</span>
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    A short example of `Scan` class usage::</span>
+
+<span class="sd">        import pylidc as pl</span>
+
+<span class="sd">        scans = pl.query(pl.Scan).filter(pl.Scan.slice_thickness &lt;= 1)</span>
+<span class="sd">        print(scans.count())</span>
+<span class="sd">        # =&gt; 97</span>
+
+<span class="sd">        scan = scans.first()</span>
+<span class="sd">        print(scan.patient_id,</span>
+<span class="sd">              scan.pixel_spacing,</span>
+<span class="sd">              scan.slice_thickness,</span>
+<span class="sd">              scan.slice_spacing)</span>
+<span class="sd">        # =&gt; LIDC-IDRI-0066, 0.63671875, 0.6, 0.5</span>
+
+<span class="sd">        print(len(scan.annotations))</span>
+<span class="sd">        # =&gt; 11</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">__tablename__</span>           <span class="o">=</span> <span class="s1">&#39;scans&#39;</span>
     <span class="nb">id</span>                      <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -190,36 +200,31 @@
 <div class="viewcode-block" id="Scan.get_path_to_dicom_files"><a class="viewcode-back" href="../../scan.html#pylidc.Scan.get_path_to_dicom_files">[docs]</a>    <span class="k">def</span> <span class="nf">get_path_to_dicom_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the path to where the DICOM files are stored for this scan, </span>
-<span class="sd">        relative to the root path set in the pylidc configuration file (e.g.,</span>
+<span class="sd">        relative to the root path set in the pylidc configuration file (i.e.,</span>
 <span class="sd">        `~/.pylidc` in MAC and Linux).</span>
 <span class="sd">        </span>
-<span class="sd">        *This path is tricky and would benefit from coordination with TCIA.*</span>
+<span class="sd">        1. In older downloads, the data DICOM data would download as::</span>
 
-<span class="sd">        1.) In older downloads, the data DICOM data would download as:</span>
+<span class="sd">               [...]/LIDC-IDRI/LIDC-IDRI-dddd/uid1/uid2/dicom_file.dcm</span>
 
-<span class="sd">            [...]/LIDC-IDRI/LIDC-IDRI-####/scan_instance_uid/series_instance_uid/*.dcm</span>
+<span class="sd">           where [...] is the base path set in the pylidc configuration</span>
+<span class="sd">           filee; uid1 is `Scan.study_instance_uid`; and, uid2</span>
+<span class="sd">           is `Scan.series_instance_uid` .</span>
 
-<span class="sd">            For example,</span>
-<span class="sd">        </span>
-<span class="sd">            /data/storage/path/LIDC-IDRI/LIDC-IDRI-0078/1.3.6.1.4.1.14519.5.2.1.6279.6001.339170810277323131167631068432/1.3.6.1.4.1.14519.5.2.1.6279.6001.303494235102183795724852353824</span>
+<span class="sd">        2. However, in more recent downloads, the data is downloaded like::</span>
 
-<span class="sd">        2.) However, in more recent downloads, the data is downloaded like:</span>
+<span class="sd">               [...]/LIDC-IDRI/LIDC-IDRI-dddd/???</span>
 
-<span class="sd">            [...]/LIDC-IDRI/LIDC-IDRI-####/??????</span>
+<span class="sd">           where &quot;???&quot; is some unknown folder hierarchy convention used</span>
+<span class="sd">           by TCIA.</span>
 
-<span class="sd">        We first check 1.) and hope that it works. Otherwise, we check if the</span>
-<span class="sd">        `LIDC-IDRI-#### folder exists in the root path. If so, then we </span>
-<span class="sd">        recursively search the `LIDC-IDRI-####` directory until we find</span>
+<span class="sd">        We first check option 1. Otherwise, we check if the</span>
+<span class="sd">        &quot;LIDC-IDRI-dddd&quot; folder exists in the root path. If so, then we </span>
+<span class="sd">        recursively search the &quot;LIDC-IDRI-dddd&quot; directory until we find</span>
 <span class="sd">        the correct subfolder that contains a DICOM file with the correct</span>
 <span class="sd">        `study_instance_uid` and `series_instance_uid`.</span>
 
-<span class="sd">        Note that 2.) is much less efficient that 1.); however, 2.) is very</span>
-<span class="sd">        robust.</span>
-
-<span class="sd">        Example:</span>
-<span class="sd">            &gt;&gt;&gt; scan = pl.query(pl.Scan).first()</span>
-<span class="sd">            &gt;&gt;&gt; print(scan.get_path_to_dicom_files())</span>
-<span class="sd">            &gt;&gt;&gt; # =&gt; /data/storage/path/LIDC-IDRI/LIDC-IDRI-0078/1.3.6.1.4.1.14519.5.2.1.6279.6001.339170810277323131167631068432/1.3.6.1.4.1.14519.5.2.1.6279.6001.303494235102183795724852353824</span>
+<span class="sd">        Option 2 is less efficient than 1; however, option 2 is robust.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">dicompath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span><span class="n">dpath_msg</span><span class="p">)</span>
@@ -258,77 +263,157 @@
 
                 <span class="k">if</span> <span class="n">seid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">series_instance_uid</span> <span class="ow">and</span> \
                    <span class="n">stid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">study_instance_uid</span><span class="p">:</span>
-                   <span class="n">path</span> <span class="o">=</span> <span class="n">dpath</span>
-                   <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
-                   <span class="k">break</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">dpath</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t find DICOM files for </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="o">%</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">path</span></div>
 
+<div class="viewcode-block" id="Scan.load_all_dicom_images"><a class="viewcode-back" href="../../scan.html#pylidc.Scan.load_all_dicom_images">[docs]</a>    <span class="k">def</span> <span class="nf">load_all_dicom_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load all the DICOM images assocated with this scan and return as list.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        verbose: bool</span>
+<span class="sd">            Turn the loading method on/off.</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        An example::</span>
+
+<span class="sd">            import pylidc as pl</span>
+<span class="sd">            import matplotlib.pyplot as plt</span>
+
+<span class="sd">            scan = pl.query(pl.Scan).first()</span>
+
+<span class="sd">            images = scan.load_all_dicom_images()</span>
+<span class="sd">            zs = [float(img.ImagePositionPatient[2]) for img in images]</span>
+<span class="sd">            print(zs[1] - zs[0], img.SliceThickness, scan.slice_thickness)</span>
+<span class="sd">            </span>
+<span class="sd">            plt.imshow( images[0].pixel_array, cmap=plt.cm.gray )</span>
+<span class="sd">            plt.show()</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading dicom files ... This may take a moment.&quot;</span><span class="p">)</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path_to_dicom_files</span><span class="p">()</span>
+        <span class="n">fnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">fname</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.dcm&#39;</span><span class="p">)]</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">dicom</span><span class="o">.</span><span class="n">dcmread</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">fname</span><span class="p">))</span>
+
+            <span class="n">seid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">SeriesInstanceUID</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">stid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">StudyInstanceUID</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">seid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">series_instance_uid</span> <span class="ow">and</span>\
+               <span class="n">stid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">study_instance_uid</span><span class="p">:</span>
+                <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+        <span class="c1"># ##############################################</span>
+        <span class="c1"># Clean multiple z scans.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Some scans contain multiple slices with the same `z` coordinate </span>
+        <span class="c1"># from the `ImagePositionPatient` tag.</span>
+        <span class="c1"># The arbitrary choice to take the slice with lesser </span>
+        <span class="c1"># `InstanceNumber` tag is made.</span>
+        <span class="c1"># This takes some work to accomplish...</span>
+        <span class="n">zs</span>    <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">ImagePositionPatient</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
+        <span class="n">inums</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">InstanceNumber</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)))</span>
+        <span class="k">while</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inds</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="n">j</span> <span class="ow">and</span> <span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">zs</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                        <span class="n">k</span> <span class="o">=</span> <span class="n">i</span> <span class="k">if</span> <span class="n">inums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">inums</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">else</span> <span class="n">j</span>
+                        <span class="n">inds</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">inds</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+
+        <span class="c1"># Prune the duplicates found in the loops above.</span>
+        <span class="n">zs</span>     <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">))</span>     <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">]</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">]</span>
+
+        <span class="c1"># Sort everything by (now unique) ImagePositionPatient z coordinate.</span>
+        <span class="n">sort_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
+        <span class="n">images</span>    <span class="o">=</span> <span class="p">[</span><span class="n">images</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sort_inds</span><span class="p">]</span>
+        <span class="c1"># End multiple z clean.</span>
+        <span class="c1"># ##############################################</span>
+
+        <span class="k">return</span> <span class="n">images</span></div>
+
+
 <div class="viewcode-block" id="Scan.cluster_annotations"><a class="viewcode-back" href="../../scan.html#pylidc.Scan.cluster_annotations">[docs]</a>    <span class="k">def</span> <span class="nf">cluster_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
-                            <span class="n">return_distance_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                            <span class="n">min_tol</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span> <span class="n">return_distance_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Estimate which annotations refer to the same physical </span>
-<span class="sd">        nodule. This method clusters all nodule Annotations for a </span>
-<span class="sd">        Scan by computing a distance measure between the annotations.</span>
-
+<span class="sd">        nodule in the CT scan. This method clusters all nodule Annotations for</span>
+<span class="sd">        a Scan by computing a distance measure between the annotations.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ------</span>
 <span class="sd">        metric: string or callable, default &#39;min&#39;</span>
-<span class="sd">            If string, see </span>
-<span class="sd">                `from pylidc.annotation_distance_metrics import metrics`</span>
-<span class="sd">                `metrics.keys()`</span>
+<span class="sd">            If string, see::</span>
+
+<span class="sd">                from pylidc.annotation_distance_metrics import </span>
+<span class="sd">                print(metrics metrics.keys())</span>
+
 <span class="sd">            for available metrics. If callable, the provided function,</span>
 <span class="sd">            should take two Annotation objects and return a float, i.e.,</span>
-<span class="sd">            metric(ann1, ann2).</span>
+<span class="sd">            `isinstance( metric(ann1, ann2), float )`.</span>
 
-<span class="sd">        tol: float, default None</span>
+<span class="sd">        tol: float, default=None</span>
 <span class="sd">            A distance in millimeters. Annotations are grouped when </span>
 <span class="sd">            the minimum distance between their boundary contour points</span>
-<span class="sd">            is less than `tol`. The default, None, sets</span>
-<span class="sd">            `tol = scan.pixel_spacing`. More detail on this is found below.</span>
+<span class="sd">            is less than `tol`. If `tol = None` (the default), then</span>
+<span class="sd">            `tol = scan.pixel_spacing` is used.</span>
 
 <span class="sd">        factor: float, default=0.9</span>
-<span class="sd">            If `tol` resulted in any group of nodules with more than</span>
+<span class="sd">            If `tol` resulted in any group of annotations with more than</span>
 <span class="sd">            4 Annotations, then `tol` is multiplied by `factor` and the</span>
 <span class="sd">            grouping is performed again.</span>
+
+<span class="sd">        min_tol: float, default=0.1</span>
+<span class="sd">            If `tol` is reduced below `min_tol` (see the `factor` parameter),</span>
+<span class="sd">            then the routine exits because we conclude that the annotation </span>
+<span class="sd">            groups cannot be automatically reduced to have groups </span>
+<span class="sd">            with each group having `Annotations&lt;=4` (as expected </span>
+<span class="sd">            with LIDC data).</span>
 
 <span class="sd">        return_distance_matrix: bool, default False</span>
 <span class="sd">            Optionally return the distance matrix that was used</span>
 <span class="sd">            to produce the clusters.</span>
 
-<span class="sd">        verbose: bool, default True</span>
-<span class="sd">            If `tol` is reduced below 1e-1, then we conclude that </span>
-<span class="sd">            the nodule groups cannot be automatically reduced to have</span>
-<span class="sd">            groups with number of Annotations &lt;= 4, and a warning message</span>
-<span class="sd">            is printed. If verbose=False, this message is not printed.</span>
+<span class="sd">        verbose: bool, default=True</span>
+<span class="sd">            If True, a warning message is printed when `tol &lt; min_tol` occurs.</span>
 
-<span class="sd">        returns: clusters, a list of lists.</span>
-<span class="sd">            `clusters[j]` is a list of Annotation objects deemed</span>
-<span class="sd">            to refer to the same physical nodule in the Scan.</span>
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        clusters: list of lists.</span>
+<span class="sd">            `clusters[i]` is a list of :class:`pylidc.Annotation` objects</span>
+<span class="sd">            that refer to the same physical nodule in the Scan. `len(clusters)` </span>
+<span class="sd">            estimates the number of unique physical nodules in the Scan.</span>
 
-<span class="sd">            `len(clusters)` attempts to estimate (via the specified `tol`)</span>
-<span class="sd">            the number of unique physical nodules present in this Scan as </span>
-<span class="sd">            determined by this overlap method and the tolerance used.</span>
-
-<span class="sd">        More on the `tol` parameter and distance measures:</span>
-
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
 <span class="sd">        The &quot;distance&quot; matrix, `d[i,j]`, between all Annotations for </span>
 <span class="sd">        the Scan is first computed using the provided `metric` parameter.</span>
+<span class="sd">        Annotations are said to be adjacent when `d[i,j]&lt;=tol`. </span>
+<span class="sd">        Annotation groups are determined by finding the connected components </span>
+<span class="sd">        of the graph associated with this adjacency matrix.</span>
 
-<span class="sd">        Annotations are &quot;grouped&quot; or estimated to refer to the same physical</span>
-<span class="sd">        nodule when `d &lt;= tol`. The groupings are formed by determining </span>
-<span class="sd">        the adjacency matrix for the Annotations. Annotations are said to be</span>
-<span class="sd">        adjacent when `d[i,j] &lt;= tol`. Groups are determined by finding </span>
-<span class="sd">        the connected components of the graph associated with </span>
-<span class="sd">        this adjacency matrix.</span>
-
-<span class="sd">        Example::</span>
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        An example::</span>
 
 <span class="sd">            import pylidc as pl</span>
 <span class="sd">            </span>
 <span class="sd">            scan = pl.query(pl.Scan).first()</span>
 <span class="sd">            nodules = scan.cluster_annotations()</span>
+
 <span class="sd">            print(&quot;This can has %d nodules.&quot; % len(nodules))</span>
 <span class="sd">            # =&gt; This can has 4 nodules.</span>
 <span class="sd">            </span>
@@ -338,6 +423,7 @@
 <span class="sd">            # =&gt; Nodule 2 has 4 annotations.</span>
 <span class="sd">            # =&gt; Nodule 3 has 1 annotations.</span>
 <span class="sd">            # =&gt; Nodule 4 has 4 annotations.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">factor</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;`factor` must be in the interval (0,1).&quot;</span>
 
@@ -377,7 +463,7 @@
         <span class="c1"># no nodules with more than 4 annotations.</span>
         <span class="k">while</span> <span class="nb">any</span><span class="p">([</span><span class="n">c</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]):</span>
             <span class="n">tol</span> <span class="o">*=</span> <span class="n">factor</span>
-            <span class="k">if</span> <span class="n">tol</span> <span class="o">&lt;</span> <span class="mf">1e-1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tol</span> <span class="o">&lt;</span> <span class="n">min_tol</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Failed to reduce all groups to &lt;= 4 Annotations.</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="n">msg</span><span class="o">+=</span> <span class="s2">&quot;Some nodules may be close and must be grouped manually.&quot;</span>
                 <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -402,73 +488,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">clusters</span></div>
 
-<div class="viewcode-block" id="Scan.load_all_dicom_images"><a class="viewcode-back" href="../../scan.html#pylidc.Scan.load_all_dicom_images">[docs]</a>    <span class="k">def</span> <span class="nf">load_all_dicom_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Load all the DICOM images assocated with this scan and return as list.</span>
-
-<span class="sd">        Example::</span>
-
-<span class="sd">            import pylidc as pl</span>
-<span class="sd">            import matplotlib.pyplot as plt</span>
-
-<span class="sd">            scan = pl.query(pl.Scan).first()</span>
-
-<span class="sd">            images = scan.load_all_dicom_images()</span>
-<span class="sd">            zs = [float(img.ImagePositionPatient[2]) for img in images]</span>
-<span class="sd">            print(zs[1] - zs[0], img.SliceThickness, scan.slice_thickness)</span>
-<span class="sd">            </span>
-<span class="sd">            plt.imshow( images[0].pixel_array, cmap=plt.cm.gray )</span>
-<span class="sd">            plt.show()</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading dicom files ... This may take a moment.&quot;</span><span class="p">)</span>
-
-        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path_to_dicom_files</span><span class="p">()</span>
-        <span class="n">fnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">fname</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.dcm&#39;</span><span class="p">)]</span>
-        <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
-            <span class="n">image</span> <span class="o">=</span> <span class="n">dicom</span><span class="o">.</span><span class="n">dcmread</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">fname</span><span class="p">))</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
-
-        <span class="c1"># ##############################################</span>
-        <span class="c1"># Clean multiple z scans.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Some scans contain multiple slices with the same `z` coordinate </span>
-        <span class="c1"># from the `ImagePositionPatient` tag.</span>
-        <span class="c1"># The arbitrary choice to take the slice with lesser </span>
-        <span class="c1"># `InstanceNumber` tag is made.</span>
-        <span class="c1"># This takes some work to accomplish...</span>
-        <span class="n">zs</span>    <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">ImagePositionPatient</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
-        <span class="n">inums</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">InstanceNumber</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
-        <span class="n">inds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)))</span>
-        <span class="k">while</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inds</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="n">j</span> <span class="ow">and</span> <span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">zs</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
-                        <span class="n">k</span> <span class="o">=</span> <span class="n">i</span> <span class="k">if</span> <span class="n">inums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">inums</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">else</span> <span class="n">j</span>
-                        <span class="n">inds</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">inds</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
-
-        <span class="c1"># Prune the duplicates found in the loops above.</span>
-        <span class="n">zs</span>     <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">))</span>     <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">]</span>
-        <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">]</span>
-
-        <span class="c1"># Sort everything by (now unique) ImagePositionPatient z coordinate.</span>
-        <span class="n">sort_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
-        <span class="n">images</span>    <span class="o">=</span> <span class="p">[</span><span class="n">images</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sort_inds</span><span class="p">]</span>
-        <span class="c1"># End multiple z clean.</span>
-        <span class="c1"># ##############################################</span>
-
-        <span class="k">return</span> <span class="n">images</span></div>
-
 <div class="viewcode-block" id="Scan.visualize"><a class="viewcode-back" href="../../scan.html#pylidc.Scan.visualize">[docs]</a>    <span class="k">def</span> <span class="nf">visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotation_groups</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Visualize the scan.</span>
 
-<span class="sd">        annotation_groups: list of lists of Annotation objects</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        annotation_groups: list of lists of Annotation objects, default=None</span>
 <span class="sd">            This argument should be supplied by the returned object from</span>
 <span class="sd">            the `cluster_annotations` method.</span>
 
-<span class="sd">        Example::</span>
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        An example::</span>
 
 <span class="sd">            import pylidc as pl</span>
 <span class="sd">            </span>
@@ -476,6 +508,7 @@
 <span class="sd">            nodules = scan.cluster_annotations()</span>
 <span class="sd">            </span>
 <span class="sd">            scan.visualize(annotation_groups=nodules)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">images</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_all_dicom_images</span><span class="p">()</span>
 
@@ -594,7 +627,9 @@
 <span class="sd">        This computes the median of the difference</span>
 <span class="sd">        between the slice coordinates, i.e., `scan.slice_zvals`.</span>
 
-<span class="sd">        NOTE: that this attribute is typically (but not always!) the</span>
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        This attribute is typically (but not always!) the</span>
 <span class="sd">        same as the `slice_thickness` attribute. Furthermore,</span>
 <span class="sd">        the `slice_spacing` does NOT necessarily imply that all the </span>
 <span class="sd">        slices are spaced with spacing (although they often are).</span>
@@ -629,13 +664,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../tuts/scan.html">The Scan class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuts/annotation.html">The Annotation class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuts/consensus.html">Annotation Consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuts/consensus.html">Annotation consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuts/advanced-queries.html">Advanced queries</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Full API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../scan.html">Scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../annotation.html">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../consensus.html">Annotation Consensus</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">

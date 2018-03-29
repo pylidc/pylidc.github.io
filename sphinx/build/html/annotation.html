@@ -55,100 +55,201 @@
 annotation of a nodule &gt;= 3mm class with a particular scan. A nodule
 has many contours, each of which refers to the contour drawn for
 nodule in each scan slice.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>subtlety</strong> (<em>int</em>) – blah</li>
-<li><strong>internalStructure</strong> (<em>int</em>) – blah</li>
-<li><strong>calcification</strong> (<em>int</em>) – blah</li>
-<li><strong>sphericity</strong> (<em>int</em>) – blah</li>
-<li><strong>margin</strong> (<em>int</em>) – blah</li>
-<li><strong>lobulation</strong> (<em>int</em>) – blah</li>
-<li><strong>spiculation</strong> (<em>int</em>) – blah</li>
-<li><strong>texture</strong> (<em>int</em>) – blah</li>
-<li><strong>malignancy</strong> (<em>int</em>) – blah</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="attribute">
+<dt id="pylidc.Annotation.subtlety">
+<code class="descname">subtlety</code><a class="headerlink" href="#pylidc.Annotation.subtlety" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4,5}</em> – Difficulty of detection. Higher values indicate easier detection.</p>
+<ol class="arabic simple">
+<li>‘Extremely Subtle’</li>
+<li>‘Moderately Subtle’</li>
+<li>‘Fairly Subtle’</li>
+<li>‘Moderately Obvious’</li>
+<li>‘Obvious’</li>
+</ol>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Annotation.internalStructure">
+<code class="descname">internalStructure</code><a class="headerlink" href="#pylidc.Annotation.internalStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4}</em> – Internal composition of the nodule.</p>
+<ol class="arabic simple">
+<li>‘Soft Tissue’</li>
+<li>‘Fluid’</li>
+<li>‘Fat’</li>
+<li>‘Air’</li>
+</ol>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Annotation.calcification">
+<code class="descname">calcification</code><a class="headerlink" href="#pylidc.Annotation.calcification" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4,6}</em> – Pattern of calcification, if present.</p>
+<ol class="arabic simple">
+<li>‘Popcorn’</li>
+<li>‘Laminated’</li>
+<li>‘Solid’</li>
+<li>‘Non-central’</li>
+<li>‘Central’</li>
+<li>‘Absent’</li>
+</ol>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Annotation.sphericity">
+<code class="descname">sphericity</code><a class="headerlink" href="#pylidc.Annotation.sphericity" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4,5}</em> – The three-dimensional shape of the nodule in terms of its roundness.</p>
+<ol class="arabic simple">
+<li>‘Linear’</li>
+<li>‘Ovoid/Linear’</li>
+<li>‘Ovoid’</li>
+<li>‘Ovoid/Round’</li>
+<li>‘Round’</li>
+</ol>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Annotation.margin">
+<code class="descname">margin</code><a class="headerlink" href="#pylidc.Annotation.margin" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4,5}</em> – Description of how well-defined the nodule margin is.</p>
+<ol class="arabic simple">
+<li>‘Poorly Defined’</li>
+<li>‘Near Poorly Defined’</li>
+<li>‘Medium Margin’</li>
+<li>‘Near Sharp’</li>
+<li>‘Sharp’</li>
+</ol>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Annotation.lobulation">
+<code class="descname">lobulation</code><a class="headerlink" href="#pylidc.Annotation.lobulation" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4,5}</em> – The degree of lobulation ranging from none to marked</p>
+<ol class="arabic simple">
+<li>‘No Lobulation’</li>
+<li>‘Nearly No Lobulation’</li>
+<li>‘Medium Lobulation’</li>
+<li>‘Near Marked Lobulation’</li>
+<li>‘Marked Lobulation’</li>
+</ol>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Annotation.spiculation">
+<code class="descname">spiculation</code><a class="headerlink" href="#pylidc.Annotation.spiculation" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4,5}</em> – The extent of spiculation present.</p>
+<ol class="arabic simple">
+<li>‘No Spiculation’</li>
+<li>‘Nearly No Spiculation’</li>
+<li>‘Medium Spiculation’</li>
+<li>‘Near Marked Spiculation’</li>
+<li>‘Marked Spiculation’</li>
+</ol>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Annotation.texture">
+<code class="descname">texture</code><a class="headerlink" href="#pylidc.Annotation.texture" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4,5}</em> – Radiographic solidity: internal texture (solid, ground glass,
+or mixed).</p>
+<ol class="arabic simple">
+<li>‘Non-Solid/GGO’</li>
+<li>‘Non-Solid/Mixed’</li>
+<li>‘Part Solid/Mixed’</li>
+<li>‘Solid/Mixed’</li>
+<li>‘Solid’</li>
+</ol>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pylidc.Annotation.malignancy">
+<code class="descname">malignancy</code><a class="headerlink" href="#pylidc.Annotation.malignancy" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, range = {1,2,3,4,5}</em> – Subjective assessment of the likelihood of
+malignancy, assuming the scan originated from a 60-year-old male
+smoker.</p>
+<ol class="arabic simple">
+<li>‘Highly Unlikely’</li>
+<li>‘Moderately Unlikely’</li>
+<li>‘Indeterminate’</li>
+<li>‘Moderately Suspicious’</li>
+<li>‘Highly Suspicious’</li>
+</ol>
+</dd></dl>
+
 <p class="rubric">Example</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><p class="first">import pylidc as pl
-# Get the first annotation with spiculation value greater than 3.
-ann = pl.query(pl.Annotation).filter(pl.Annotation.spiculation &gt; 3).first()</p>
-<p>print(ann.spiculation)
-# =&gt; 4</p>
-<p># Each nodule feature has a corresponding property
-# to print the semantic value.
-print(ann.Spiculation)
-# =&gt; Medium-High Spiculation</p>
-<p>q = pl.query(pl.Annotation).join(pl.Scan)
-q = q.filter(pl.Scan.slice_thickness &lt;= 1,</p>
-<blockquote>
-<div>pl.Annotation.malignancy == 5)</div></blockquote>
-<p>print(q.count())
-# =&gt; 58</p>
-<p class="last">ann = q.first()
-print(“%.2f, %.2f, %.2f” % (ann.diameter, ann.surface_area, ann.volume))
-# =&gt; 17.98, 1221.40, 1033.70</p>
-</dd>
-</dl>
+<p>A short usage example for the Annotation class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+
+<span class="c1"># Get the first annotation with spiculation value greater than 3.</span>
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span>\
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">spiculation</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">spiculation</span><span class="p">)</span>
+<span class="c1"># =&gt; 4</span>
+
+<span class="c1"># Each nodule feature has a corresponding property</span>
+<span class="c1"># to print the semantic value.</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">Spiculation</span><span class="p">)</span>
+<span class="c1"># =&gt; Medium-High Spiculation</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">anns</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">diameter</span><span class="p">,</span>
+                            <span class="n">ann</span><span class="o">.</span><span class="n">surface_area</span><span class="p">,</span>
+                            <span class="n">ann</span><span class="o">.</span><span class="n">volume</span><span class="p">))</span>
+<span class="c1"># =&gt; 17.98, 1221.40, 1033.70</span>
+</pre></div>
+</div>
 <dl class="attribute">
 <dt id="pylidc.Annotation.Calcification">
 <code class="descname">Calcification</code><a class="headerlink" href="#pylidc.Annotation.Calcification" title="Permalink to this definition">¶</a></dt>
-<dd><p>return calcification value as string</p>
+<dd><p>Semantic interpretation of <cite>calcification</cite> value as string.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.InternalStructure">
 <code class="descname">InternalStructure</code><a class="headerlink" href="#pylidc.Annotation.InternalStructure" title="Permalink to this definition">¶</a></dt>
-<dd><p>return internalStructure value as string</p>
+<dd><p>Semantic interpretation of <cite>internalStructure</cite> value as string.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.Lobulation">
 <code class="descname">Lobulation</code><a class="headerlink" href="#pylidc.Annotation.Lobulation" title="Permalink to this definition">¶</a></dt>
-<dd><p>return lobulation value as string</p>
+<dd><p>Semantic interpretation of <cite>lobulation</cite> value as string.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.Malignancy">
 <code class="descname">Malignancy</code><a class="headerlink" href="#pylidc.Annotation.Malignancy" title="Permalink to this definition">¶</a></dt>
-<dd><p>return malignancy value as string</p>
+<dd><p>Semantic interpretation of <cite>malignancy</cite> value as string.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.Margin">
 <code class="descname">Margin</code><a class="headerlink" href="#pylidc.Annotation.Margin" title="Permalink to this definition">¶</a></dt>
-<dd><p>return margin value as string</p>
+<dd><p>Semantic interpretation of <cite>margin</cite> value as string.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.Sphericity">
 <code class="descname">Sphericity</code><a class="headerlink" href="#pylidc.Annotation.Sphericity" title="Permalink to this definition">¶</a></dt>
-<dd><p>return sphericity value as string</p>
+<dd><p>Semantic interpretation of <cite>sphericity</cite> value as string.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.Spiculation">
 <code class="descname">Spiculation</code><a class="headerlink" href="#pylidc.Annotation.Spiculation" title="Permalink to this definition">¶</a></dt>
-<dd><p>return spiculation value as string</p>
+<dd><p>Semantic interpretation of <cite>spiculation</cite> value as string.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.Subtlety">
 <code class="descname">Subtlety</code><a class="headerlink" href="#pylidc.Annotation.Subtlety" title="Permalink to this definition">¶</a></dt>
-<dd><p>return subtlety value as string</p>
+<dd><p>Semantic interpretation of <cite>subtlety</cite> value as string.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.Texture">
 <code class="descname">Texture</code><a class="headerlink" href="#pylidc.Annotation.Texture" title="Permalink to this definition">¶</a></dt>
-<dd><p>return texture value as string</p>
+<dd><p>Semantic interpretation of <cite>texture</cite> value as string.</p>
 </dd></dl>
 
 <dl class="method">
@@ -163,12 +264,11 @@ into the image volume corresponding to the extent of the
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pad</strong> (<em>int</em><em>, </em><em>list of ints</em><em>, or </em><em>float</em><em>, </em><em>default=None</em>) – <ul>
 <li>If None (default), then no padding is used.</li>
-<li>If an integer is provided, then the slices are padded
+<li>If an integer is provided, then the bounding box is padded
 uniformly by this integer amount.</li>
-<li><dl class="first docutils">
-<dt>If a list of integers is provided, then it is of the form</dt>
-<dd><cite>[(i1,i2), (j1,j2), (k1,k2)]</cite></dd>
-</dl>
+<li>If a list of integers is provided, then it is of the form:<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">i1</span><span class="p">,</span><span class="n">i2</span><span class="p">),</span> <span class="p">(</span><span class="n">j1</span><span class="p">,</span><span class="n">j2</span><span class="p">),</span> <span class="p">(</span><span class="n">k1</span><span class="p">,</span><span class="n">k2</span><span class="p">)]</span>
+</pre></div>
+</div>
 <p>and indicates the pad amounts along each coordinate axis.</p>
 </li>
 <li>If a float is provided, then the slices are padded such
@@ -189,7 +289,20 @@ pad beyond the image borders is requested, then it is set
 to the maximum (or minimum, depending on the direction)
 possible index.</p>
 </div>
-<p class="rubric">Examples</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>bb</strong> – <cite>bb</cite> is the corresponding bounding box (with desired padding)
+in the CT image volume. <cite>bb[i]</cite> is a slice corresponding
+to the the extent of the bounding box along the
+coordinate axis <cite>i</cite>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">3-tuple of Python <cite>slice</cite> objects.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
 <p>The example below illustrates the various <cite>pad</cite> argument types:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
 
@@ -223,12 +336,34 @@ possible index.</p>
 <dl class="method">
 <dt id="pylidc.Annotation.bbox_dims">
 <code class="descname">bbox_dims</code><span class="sig-paren">(</span><em>pad=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Annotation.html#Annotation.bbox_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Annotation.bbox_dims" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the physical dimensions of the nodule bounding box in mm.</p>
-<dl class="docutils">
-<dt>pad: int, list, or float, default=None</dt>
-<dd>See <a class="reference internal" href="#pylidc.Annotation.bbox" title="pylidc.Annotation.bbox"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.Annotation.bbox()</span></code></a> for a
-description of this argument.</dd>
-</dl>
+<dd><p>Return the physical dimensions of the nodule bounding box in
+millimeters along each coordinate axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pad</strong> (<em>int</em><em>, </em><em>list</em><em>, or </em><em>float</em><em>, </em><em>default=None</em>) – See <a class="reference internal" href="#pylidc.Annotation.bbox" title="pylidc.Annotation.bbox"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.Annotation.bbox()</span></code></a> for a
+description of this argument.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>dims</strong> – <cite>dims[i]</cite> is the length in millimeters of the bounding box along
+the coordinate axis <cite>i</cite>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray, shape=(3,)</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>An example where we compare the bounding box volume vs the nodule
+volume:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2"> mm^3, </span><span class="si">%.2f</span><span class="s2"> mm^3&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">bbox_dims</span><span class="p">())))</span>
+<span class="c1"># =&gt; 2439.30 mm^3, 5437.58 mm^3</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -238,25 +373,45 @@ description of this argument.</dd>
 into an image volume. On the other hand, <cite>bbox_array</cite> returns
 a 3x2 matrix where each row is the (start, stop) indices of the
 i, j, and k axes.</p>
-<dl class="docutils">
-<dt>pad: int, list, or float</dt>
-<dd>See <cite>Annotation.bbox</cite> for description of this argument.</dd>
-<dt>NOTE: The indices return by <cite>bbox_array</cite> are <em>inclusive</em>, whereas</dt>
-<dd>the indices of the slice objects in the tuple return by <cite>bbox</cite>
-are offset by +1 in the “stop” index.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pad</strong> (<em>int</em><em>, </em><em>list</em><em>, or </em><em>float</em>) – See <a class="reference internal" href="#pylidc.Annotation.bbox" title="pylidc.Annotation.bbox"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.Annotation.bbox()</span></code></a> for a
+description of this argument.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The indices return by <cite>bbox_array</cite> are <em>inclusive</em>, whereas
+the indices of the slice objects in the tuple return by <cite>bbox</cite>
+are offset by +1 in the “stop” index.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>bb_mat</strong> – <cite>bb_mat[i]</cite> is the stop and start indices (inclusive) of the
+bounding box along coordinate axis <cite>i</cite>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray, shape=(3,2)</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bb</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bm</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">bbox_matrix</span><span class="p">()</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">bm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">start</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; True</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">bm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span> <span class="o">==</span> <span class="n">bb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">stop</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; True</span>
+<p>An example of the difference between <cite>bbox</cite> and <cite>bbox_matrix</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+<span class="n">bb</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+<span class="n">bm</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">bbox_matrix</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">bm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">start</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]))</span>
+<span class="c1"># =&gt; True</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">bm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span> <span class="o">==</span> <span class="n">bb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">stop</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]))</span>
+<span class="c1"># =&gt; True</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -269,29 +424,38 @@ non-nodule. The <cite>mask</cite> volume covers the extent of the voxels
 in the image volume given by <cite>annotation.bbox</cite>, i.e., the <cite>mask</cite>
 volume would be placed in the full image volume according to
 the <cite>bbox</cite> attribute.</p>
-<dl class="docutils">
-<dt>pad: int, list, or float, default=None</dt>
-<dd>See <cite>Annotation.bbox</cite> for description of this argument.</dd>
-<dt>bbox: 3x2 NumPy array, default=None</dt>
-<dd>If <cite>bbox</cite> is provided, then <cite>pad</cite> is ignored. This argument allows
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pad</strong> (<em>int</em><em>, </em><em>list</em><em>, or </em><em>float</em><em>, </em><em>default=None</em>) – See <a class="reference internal" href="#pylidc.Annotation.bbox" title="pylidc.Annotation.bbox"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.Annotation.bbox()</span></code></a> for a
+description of this argument.</li>
+<li><strong>bbox</strong> (<em>3x2 NumPy array</em><em>, </em><em>default=None</em>) – If <cite>bbox</cite> is provided, then <cite>pad</cite> is ignored. This argument allows
 for more fine-tuned control of placement of the mask in a volume,
 or for pre-computation of bbox when working with multiple
-Annotation object.</dd>
-</dl>
+Annotation object.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vol</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">to_volume</span><span class="p">()</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">boolean_mask</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bbox</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Avg HU inside nodule: </span><span class="si">%.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vol</span><span class="p">[</span><span class="n">bbox</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; Avg HU inside nodule: -280.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Avg HU outside nodule: </span><span class="si">%.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vol</span><span class="p">[</span><span class="n">bbox</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; Avg HU outside nodule: -732.2</span>
+<p>An example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">vol</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">to_volume</span><span class="p">()</span>
+
+<span class="n">mask</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">boolean_mask</span><span class="p">()</span>
+<span class="n">bbox</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Avg HU inside nodule: </span><span class="si">%.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vol</span><span class="p">[</span><span class="n">bbox</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="c1"># =&gt; Avg HU inside nodule: -280.0</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Avg HU outside nodule: </span><span class="si">%.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vol</span><span class="p">[</span><span class="n">bbox</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="c1"># =&gt; Avg HU outside nodule: -732.2</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -299,40 +463,53 @@ Annotation object.</dd>
 <dl class="attribute">
 <dt id="pylidc.Annotation.centroid">
 <code class="descname">centroid</code><a class="headerlink" href="#pylidc.Annotation.centroid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the center of mass of the nodule as determined by its
+<dd><p>The center of mass of the nodule as determined by its
 radiologist-drawn contours.</p>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">round</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vol</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">to_volume</span><span class="p">()</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">vol</span><span class="p">[:,:,</span><span class="n">k</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;.r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Nodule centroid&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<p>An example of plotting the centroid on a CT image slice:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">centroid</span>
+
+<span class="n">vol</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">to_volume</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">vol</span><span class="p">[:,:,</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">)],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;.r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Nodule centroid&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>centr</strong> – <cite>centr[i]</cite> is the average index value of all contour index values
+for coordinate axis <cite>i</cite>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray, shape=(3,)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.contour_slice_indices">
 <code class="descname">contour_slice_indices</code><a class="headerlink" href="#pylidc.Annotation.contour_slice_indices" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of indices into the scan where each contour
+<dd><p>Returns an array of indices into the scan where each contour
 belongs. An example should clarify:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">zvals</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">contour_slice_zvals</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">kvals</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">contour_slice_indices</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scan_zvals</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_zvals</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kvals</span><span class="p">,</span> <span class="n">zvals</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># the two z values should the same (up to machine precision)</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">scan_zvals</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span>
+
+<span class="n">zvals</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">contour_slice_zvals</span>
+<span class="n">kvals</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">contour_slice_indices</span>
+<span class="n">scan_zvals</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">slice_zvals</span>
+
+<span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kvals</span><span class="p">,</span> <span class="n">zvals</span><span class="p">):</span>
+    <span class="c1"># the two z values should the same (up to machine precision)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">scan_zvals</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -340,13 +517,13 @@ belongs. An example should clarify:</p>
 <dl class="attribute">
 <dt id="pylidc.Annotation.contour_slice_zvals">
 <code class="descname">contour_slice_zvals</code><a class="headerlink" href="#pylidc.Annotation.contour_slice_zvals" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns an array of unique z-coordinates for the contours.</p>
+<dd><p>An array of unique z-coordinates for the contours.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pylidc.Annotation.contours_matrix">
 <code class="descname">contours_matrix</code><a class="headerlink" href="#pylidc.Annotation.contours_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return all the contours in a 3D numpy array.</p>
+<dd><p>All the contour index values a 3D numpy array.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -356,11 +533,17 @@ belongs. An example should clarify:</p>
 contours. This estimation does not currently account for cases
 where the diamter passes outside the boundary of the nodule, or
 through cavities within the nodule.</p>
-<dl class="docutils">
-<dt>returns: float (or float,Contour)</dt>
-<dd>Returns the diameter as float, accounting for the axial-plane
-resolution of the scan. The units are mm.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>diam</strong> – The maximal diameter as float, accounting for the axial-plane
+resolution of the scan. The units are mm.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -368,17 +551,28 @@ resolution of the scan. The units are mm.</dd>
 <code class="descname">feature_vals</code><span class="sig-paren">(</span><em>return_str=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Annotation.html#Annotation.feature_vals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Annotation.feature_vals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return all feature values as a numpy array in the order
 presented in <cite>feature_names</cite>.</p>
-<dl class="docutils">
-<dt>return_str: bool, default False</dt>
-<dd>If True, a list of strings is also returned, corresponding
-to the meaning of each numerical feature value.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>return_str</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, a list of strings is also returned, corresponding
+to the meaning of each numerical feature value.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>fvals[, fstrs]</strong> – <cite>fvals</cite> is an array of numerical values corresponding to the
+numerical feature values for the annotation. <cite>fstrs</cite> is a
+list of semantic string interpretations of the numerical
+values given in <cite>fvals</cite>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array[, list of strings]</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="pylidc.Annotation.print_formatted_feature_table">
 <code class="descname">print_formatted_feature_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Annotation.html#Annotation.print_formatted_feature_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Annotation.print_formatted_feature_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return all feature values as a string table.</p>
+<dd><p>Print all feature values as a string table.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -386,6 +580,16 @@ to the meaning of each numerical feature value.</dd>
 <code class="descname">surface_area</code><a class="headerlink" href="#pylidc.Annotation.surface_area" title="Permalink to this definition">¶</a></dt>
 <dd><p>Estimate the surface area by summing the areas of a trianglation
 of the nodules surface in 3d. Returned units are mm^2.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>sa</strong> – The estimated surface area in squared millimeters.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -396,46 +600,74 @@ volumes are interpolated and resampled to have uniform spacing of 1mm
 along each dimension. The resulting volumes are cubic of the
 specified <cite>side_length</cite>. Thus, the returned volumes have dimensions,
 <cite>(side_length+1,)*3</cite> (since <cite>side_length</cite> is the spacing).</p>
-<dl class="docutils">
-<dt>side_length: integer, default None</dt>
-<dd><p class="first">The physical length of each side of the new cubic
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">It would be nice if this function performed fully general
+interpolation, i.e., not necessarily uniform spacing and allowing
+different resample-resolutions along different coordinate axes.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>side_length</strong> (<em>integer</em><em>, </em><em>default=None</em>) – <p>The physical length of each side of the new cubic
 volume in millimeters. The default, <cite>None</cite>, takes the
 max of the nodule’s bounding box dimensions.</p>
-<p class="last">If this parameter is not <cite>None</cite>, then it should be
+<p>If this parameter is not <cite>None</cite>, then it should be
 greater than any bounding box dimension. If the specified
 <cite>side_length</cite> requires a padding which results in an
 out-of-bounds image index, then the image is padded with
 the minimum CT image value.</p>
-</dd>
-<dt>resample_vol: boolean, default True</dt>
-<dd>If False, only the segmentation volume is resampled.</dd>
-<dt>irp_pts: 3-tuple from meshgrid</dt>
-<dd>If provided, the volume(s) will be resampled over these interpolation
+</li>
+<li><strong>resample_vol</strong> (<em>boolean</em><em>, </em><em>default=True</em>) – If False, only the segmentation volume is resampled.</li>
+<li><strong>irp_pts</strong> (<em>3-tuple from meshgrid</em>) – If provided, the volume(s) will be resampled over these interpolation
 points, rather than the automatically calculated points. This allows
-for sampling segmentation volumes over a common coordinate-system.</dd>
-<dt>return_irp_pts: boolean, default False</dt>
-<dd>If True, the interpolation points (ix,iy,iz) at which the volume(s)
+for sampling segmentation volumes over a common coordinate-system.</li>
+<li><strong>return_irp_pts</strong> (<em>boolean</em><em>, </em><em>default=False</em>) – If True, the interpolation points (ix,iy,iz) at which the volume(s)
 were resampled are returned. These can potentially be provided as
 an argument to <cite>irp_pts</cite> for separate selfotations that refer to the
 same nodule, allowing the segmentation volumes to be resampled in a
-common coordinate-system.</dd>
-<dt>verbose: boolean, default True</dt>
-<dd>Turn the loading statement on / off.</dd>
-<dt>returns: [ct_volume,] mask [, irp_pts]</dt>
-<dd><cite>ct_volume</cite> and <cite>mask</cite> are the resampled CT and boolean
+common coordinate-system.</li>
+<li><strong>verbose</strong> (<em>boolean</em><em>, </em><em>default=True</em>) – Turn the loading statement on / off.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>[ct_volume,] mask [, irp_pts]</strong> – <cite>ct_volume</cite> and <cite>mask</cite> are the resampled CT and boolean
 volumes, respectively. <cite>ct_volume</cite> and <cite>irp_points</cite> are optionally
-returned, depending on which flags are set (see above).</dd>
-</dl>
+returned, depending on which flags are set (see above).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray, ndarray, list of ndarrays</p>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ct_volume</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">uniform_cubic_resample</span><span class="p">(</span><span class="n">side_length</span><span class="o">=</span><span class="mi">70</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ct_volume</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># =&gt; (71, 71, 71), (71, 71, 71)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># (Nodule is centered at (35,35,35).)</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span> <span class="n">ct_volume</span><span class="p">[:,:,</span><span class="mi">35</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.2</span> <span class="o">+</span> <span class="mf">0.8</span><span class="o">*</span><span class="n">mask</span><span class="p">[:,:,</span><span class="mi">35</span><span class="p">])</span> <span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<p>An example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pylidc</span> <span class="k">as</span> <span class="nn">pl</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+<span class="c1"># resampled volumes will have uniform side length of 70mm and</span>
+<span class="c1"># uniform voxel spacing of 1mm.</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">70</span>
+<span class="n">vol</span><span class="p">,</span><span class="n">mask</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">uniform_cubic_resample</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+<span class="c1"># Setup the plot.</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)),</span>
+                 <span class="n">vmin</span><span class="o">=</span><span class="n">vol</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vol</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+                 <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span><span class="p">)</span>
+
+
+<span class="c1"># View all the resampled image volume slices.</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">img</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">vol</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">mask</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mf">0.6</span><span class="o">+</span><span class="mf">0.2</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%02d</span><span class="s2"> / </span><span class="si">%02d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -444,28 +676,31 @@ returned, depending on which flags are set (see above).</dd>
 <dt id="pylidc.Annotation.visualize_in_3d">
 <code class="descname">visualize_in_3d</code><span class="sig-paren">(</span><em>edgecolor='0.2'</em>, <em>cmap='viridis'</em>, <em>step=1</em>, <em>figsize=(5</em>, <em>5)</em>, <em>backend='matplotlib'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Annotation.html#Annotation.visualize_in_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Annotation.visualize_in_3d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize in 3d a triangulation of the nodule’s surface.</p>
-<dl class="docutils">
-<dt>edgecolor: string color or rgb 3-tuple</dt>
-<dd>Sets edgecolors of triangulation.
-Ignored if backend != matplotlib.</dd>
-<dt>cmap: matplotlib colormap string.</dt>
-<dd>Sets the facecolors of the triangulation.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>edgecolor</strong> (<em>string color</em><em> or </em><em>rgb 3-tuple</em>) – Sets edgecolors of triangulation.
+Ignored if backend != matplotlib.</li>
+<li><strong>cmap</strong> (<em>matplotlib colormap string.</em>) – Sets the facecolors of the triangulation.
 See <cite>matplotlib.cm.cmap_d.keys()</cite> for all available.
-Ignored if backend != matplotlib.</dd>
-<dt>step: int, default=1</dt>
-<dd>The <cite>step_size</cite> parameter for the skimage marching_cubes function.
-Bigger values are quicker, but yield coarser surfaces.</dd>
-<dt>figsize: tuple, default=(5,5)</dt>
-<dd>Figure size for the displayed volume.</dd>
-<dt>backend: string</dt>
-<dd>The backend for visualization. Default is matplotlib.
+Ignored if backend != matplotlib.</li>
+<li><strong>step</strong> (<em>int</em><em>, </em><em>default=1</em>) – The <cite>step_size</cite> parameter for the skimage marching_cubes function.
+Bigger values are quicker, but yield coarser surfaces.</li>
+<li><strong>figsize</strong> (<em>tuple</em><em>, </em><em>default=</em><em>(</em><em>5</em><em>,</em><em>5</em><em>)</em>) – Figure size for the displayed volume.</li>
+<li><strong>backend</strong> (<em>string</em>) – The backend for visualization. Default is matplotlib.
 Execute <cite>from pylidc.Annotation import viz3dbackends</cite> to
-see available backends.</dd>
-</dl>
+see available backends.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ann</span><span class="o">.</span><span class="n">visualize_in_3d</span><span class="p">(</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;autumn&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ann</span><span class="o">.</span><span class="n">visualize_in_3d</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;mayavi&#39;</span><span class="p">)</span> <span class="c1"># If mayavi available.</span>
+<p>A short example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">ann</span><span class="o">.</span><span class="n">visualize_in_3d</span><span class="p">(</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;autumn&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -473,11 +708,21 @@ see available backends.</dd>
 <dl class="method">
 <dt id="pylidc.Annotation.visualize_in_scan">
 <code class="descname">visualize_in_scan</code><span class="sig-paren">(</span><em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylidc/Annotation.html#Annotation.visualize_in_scan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pylidc.Annotation.visualize_in_scan" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interactive visualization of the slices of the scan along with scan
-and annotation information. The visualization begins
-(but is not limited to) the first slice where the nodule occurs
-(according to the annotation). Contours are plotted atop the images
-for visualization and can be toggled on and off.</p>
+<dd><p>Engage an interactive visualization of the slices of the scan
+along with scan and annotation information.</p>
+<p>The visualization begins (but is not limited to) the first slice
+where the nodule occurs (according to the annotation). Annotation
+contours are plotted on top of the images
+for visualization and can be toggled on and off, using an interactive
+check mark utility.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>verbose</strong> (<em>bool</em><em>, </em><em>default=True</em>) – Turn the image loading statement on/off.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -498,10 +743,17 @@ piece, we use the distance between the current <cite>image_z_posiition</cite>
 and the <cite>image_z_position</cite> of one slice below or above for top or
 bottom, respectively. If the annotation only has one contour, we
 use the <cite>slice_thickness</cite> attribute of the scan.</p>
-<dl class="docutils">
-<dt>returns: float</dt>
-<dd>The estimated 3D volume of the annotated nodule. Units are mm^3.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>vol</strong> – The estimated 3D volume of the annotated nodule. Units are cubic
+millimeters.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -516,17 +768,24 @@ use the <cite>slice_thickness</cite> attribute of the scan.</p>
         <div class="sphinxsidebarwrapper">
 <h3><a href="index.html">Table Of Contents</a></h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="meta.html">Meta information</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and setup</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tuts/scan.html">The Scan class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuts/annotation.html">The Annotation class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuts/consensus.html">Consolidation of multiple annotations of a single nodule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/consensus.html">Annotation consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuts/advanced-queries.html">Advanced queries</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Full API</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="scan.html">Scan</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">Annotation Consensus</a></li>
 </ul>
 
   <h4>Previous topic</h4>

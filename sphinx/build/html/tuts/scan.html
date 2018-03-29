@@ -89,6 +89,8 @@ objects, which are radiologist annotations of lung nodules found in the scan:</p
 <span class="c1"># =&gt; 13</span>
 </pre></div>
 </div>
+<div class="section" id="annotation-clustering">
+<h2>Annotation clustering<a class="headerlink" href="#annotation-clustering" title="Permalink to this headline">¶</a></h2>
 <p>The scan has 13 annotations, but which refer to the same nodule? This can
 be determined using the <a class="reference internal" href="../scan.html#pylidc.Scan.cluster_annotations" title="pylidc.Scan.cluster_annotations"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pylidc.Scan.cluster_annotations()</span></code></a> method, which
 uses a distance function to create an adjancency graph to determine which
@@ -106,6 +108,9 @@ annotations refer to the same nodule in a scan:</p>
 <span class="c1"># =&gt; Nodule 4 has 4 annotations.</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="converting-scan-image-values-to-numpy-array">
+<h2>Converting scan image values to NumPy array<a class="headerlink" href="#converting-scan-image-values-to-numpy-array" title="Permalink to this headline">¶</a></h2>
 <p>The scan can be converted to a NumPy array for image-processing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vol</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">to_volume</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -115,6 +120,9 @@ annotations refer to the same nodule in a scan:</p>
 <span class="c1"># =&gt; -702.15, 812.52</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="scan-visualization">
+<h2>Scan visualization<a class="headerlink" href="#scan-visualization" title="Permalink to this headline">¶</a></h2>
 <p>An interactive GUI can be engaged, with clustered annotations optionally
 indicated with arrows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scan</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">annotation_groups</span><span class="o">=</span><span class="n">nods</span><span class="p">)</span>
@@ -122,6 +130,7 @@ indicated with arrows:</p>
 </div>
 <p>which appears like</p>
 <a class="reference external image-reference" href="../_images/scan_visualize.png"><img alt="../_images/scan_visualize.png" src="../_images/scan_visualize.png" /></a>
+</div>
 </div>
 
 
@@ -141,13 +150,15 @@ indicated with arrows:</p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">The Scan class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotation.html">The Annotation class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="consensus.html">Annotation Consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">Annotation consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-queries.html">Advanced queries</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Full API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../scan.html">Scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../annotation.html">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consensus.html">Annotation Consensus</a></li>
 </ul>
 
   <h4>Previous topic</h4>

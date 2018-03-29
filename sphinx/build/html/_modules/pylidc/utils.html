@@ -43,13 +43,13 @@
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">.Annotation</span> <span class="k">import</span> <span class="n">Annotation</span>
 
-<div class="viewcode-block" id="consensus"><a class="viewcode-back" href="../../tuts/consensus.html#pylidc.consensus">[docs]</a><span class="k">def</span> <span class="nf">consensus</span><span class="p">(</span><span class="n">anns</span><span class="p">,</span> <span class="n">clevel</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ret_masks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">consensus</span><span class="p">(</span><span class="n">anns</span><span class="p">,</span> <span class="n">clevel</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ret_masks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the boolean-valued consensus volume amongst the</span>
 <span class="sd">    provided annotations (`anns`) at a particular consensus level</span>
 <span class="sd">    (`clevel`).</span>
 
-<span class="sd">    Args</span>
-<span class="sd">    ------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    anns: list of `pylidc.Annotation` objects</span>
 <span class="sd">        This list should be probably be one of the lists</span>
 <span class="sd">        returned by the `pylidc.Scan.cluster_annotations`</span>
@@ -75,8 +75,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">        consensus_mask, consensus_bbox[, masks]</span>
-
+<span class="sd">    consensus_mask, consensus_bbox[, masks]: (ndarray, tuple[, list])</span>
 <span class="sd">        `consensus_mask` is the boolean-valued volume of the annotation</span>
 <span class="sd">        masks at `clevel` consensus. `consensus_bbox` is a 3-tuple of </span>
 <span class="sd">        slices that can be used to index into the image volume at the </span>
@@ -101,7 +100,7 @@
     <span class="k">if</span> <span class="n">ret_masks</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">cmask</span><span class="p">,</span> <span class="n">cbbox</span><span class="p">,</span> <span class="n">masks</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">cmask</span><span class="p">,</span> <span class="n">cbbox</span></div>
+        <span class="k">return</span> <span class="n">cmask</span><span class="p">,</span> <span class="n">cbbox</span>
 </pre></div>
 
           </div>
@@ -120,13 +119,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../tuts/scan.html">The Scan class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuts/annotation.html">The Annotation class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuts/consensus.html">Annotation Consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuts/consensus.html">Annotation consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuts/advanced-queries.html">Advanced queries</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Full API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../scan.html">Scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../annotation.html">Annotation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../consensus.html">Annotation Consensus</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">

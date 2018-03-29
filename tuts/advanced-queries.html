@@ -1,0 +1,325 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Advanced queries &#8212; pylidc  documentation</title>
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Scan" href="../scan.html" />
+    <link rel="prev" title="Annotation consensus" href="consensus.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../scan.html" title="Scan"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="consensus.html" title="Annotation consensus"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="advanced-queries">
+<h1>Advanced queries<a class="headerlink" href="#advanced-queries" title="Permalink to this headline">¶</a></h1>
+<p><cite>pylidc</cite> is built on <a class="reference external" href="https://www.sqlalchemy.org/">SQLAlchemy</a>, using a
+SQLite database for storage, and so, if you are familar with a SQL-like query
+language, you will find familiar capabilities in <cite>pylidc</cite>. This short tutorial
+is not a comprehensive guide to everything you can do with
+SQLAlchemy — if you’d like to explore this aspect further you should
+visit the SQLAlchemy documentation directly.</p>
+<p>Jump to:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#get-a-random-result">Get a random result</a></li>
+<li><a class="reference internal" href="#query-multiple-model-parameters-with-a-join">Query multiple model parameters with a join</a></li>
+<li><a class="reference internal" href="#filtering-with-an-in-clause">Filtering with an in clause</a></li>
+<li><a class="reference internal" href="#grouping-nodules-with-similar-attributes">Grouping nodules with similar attributes</a></li>
+</ul>
+<div class="section" id="get-a-random-result">
+<h2>Get a random result<a class="headerlink" href="#get-a-random-result" title="Permalink to this headline">¶</a></h2>
+<p>One common objective for data exploration is to grab a random instance from
+some query. You can accomplish this by import <cite>func</cite> from <cite>sqlalchemy</cite>,
+ordering the results by <cite>random</cite>, and taking the first result:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">func</span>
+
+<span class="c1"># Fetch all highly suspicious nodules</span>
+<span class="n">anns</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">malignancy</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">anns</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">random</span><span class="p">())</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ann</span><span class="o">.</span><span class="n">Malignancy</span><span class="p">)</span>
+<span class="c1"># =&gt; 2516, &#39;Highly Suspicious&#39;</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">anns</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">random</span><span class="p">())</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ann</span><span class="o">.</span><span class="n">Malignancy</span><span class="p">)</span>
+<span class="c1"># =&gt; 4749, &#39;Highly Suspicious&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="query-multiple-model-parameters-with-a-join">
+<h2>Query multiple model parameters with a <cite>join</cite><a class="headerlink" href="#query-multiple-model-parameters-with-a-join" title="Permalink to this headline">¶</a></h2>
+<p>Another common objective is to query for an <cite>Annotation</cite> object that is
+constrained by the queryable parameters of its corresponding <cite>Scan</cite> in
+some way. This can be accomplished with using a <cite>join</cite>. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fetch all annotations with non-indeterminate malignancy value</span>
+<span class="c1"># and whose respective scan has slice thickness less than 1 mm.</span>
+<span class="n">anns</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span>\
+         <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">slice_thickness</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">malignancy</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">anns</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="c1"># =&gt; 181</span>
+</pre></div>
+</div>
+<p>Meanwhile, the number of non-indeterminate annotations is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">anns</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span>\
+         <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">malignancy</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">anns</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="c1"># =&gt; 4253</span>
+</pre></div>
+</div>
+<p>And, the number of scans with slice thickness less than 1 mm is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scans</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span>\
+          <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">slice_thickness</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">scans</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="c1"># =&gt; 39</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When querying with a join, be careful what object type you
+actually would like returned. In the <cite>join</cite> example above, we joined on
+<cite>Annotation</cite> and <cite>Scan</cite> objects, but returned all <cite>Annotation</cite> objects
+with the desired properties.</p>
+</div>
+</div>
+<div class="section" id="filtering-with-an-in-clause">
+<h2>Filtering with an <cite>in</cite> clause<a class="headerlink" href="#filtering-with-an-in-clause" title="Permalink to this headline">¶</a></h2>
+<p>Suppose we wanted to count the total number of annotations belonging to the
+scans in the query above. One way is to loop through all the scans and sum
+up the number of annotations belonging to each:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scans</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="p">)</span>\
+          <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Scan</span><span class="o">.</span><span class="n">slice_thickness</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">n_anns</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">scan</span><span class="o">.</span><span class="n">annotations</span><span class="p">)</span> <span class="k">for</span> <span class="n">scan</span> <span class="ow">in</span> <span class="n">scans</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n_anns</span><span class="p">)</span>
+<span class="c1"># =&gt; 300</span>
+</pre></div>
+</div>
+<p>Alternatively, a more SQL-like approach is to query for all Annotations whose
+<cite>scan_id</cite> attribute is an id from the ids from <cite>scans</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sids</span> <span class="o">=</span> <span class="p">[</span><span class="n">scan</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">scan</span> <span class="ow">in</span> <span class="n">scans</span><span class="p">]</span>
+<span class="n">anns</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">scan_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span> <span class="n">sids</span> <span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">anns</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="c1"># =&gt; 300</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="grouping-nodules-with-similar-attributes">
+<h2>Grouping nodules with similar attributes<a class="headerlink" href="#grouping-nodules-with-similar-attributes" title="Permalink to this headline">¶</a></h2>
+<p>Let’s suppose we’d like to know which <cite>Annotation</cite> s share identical
+characteristic values (i.e., lobulation, spiculation, etc.).</p>
+<p>This can be accomplished by making use of the
+<a class="reference external" href="https://www.sqlite.org/lang_aggfunc.html">SQLite aggregate functions</a>,
+such as <cite>count</cite> and <cite>group_concat</cite>, as well as the <cite>group_by</cite> and
+<cite>having</cite> functions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">func</span>
+
+<span class="c1"># Get a list of the attributes. Alternatively,</span>
+<span class="c1"># we could list them all out in the query, i.e.,</span>
+<span class="c1"># pl.Annotation.spiculation, pl.Annotation.malignancy, etc...</span>
+<span class="n">all_features</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">pl</span><span class="o">.</span><span class="n">annotation_feature_names</span><span class="p">]</span>
+
+<span class="n">groups</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">group_concat</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>\
+           <span class="o">.</span><span class="n">group_by</span><span class="p">(</span> <span class="o">*</span><span class="n">all_features</span> <span class="p">)</span>\
+           <span class="o">.</span><span class="n">having</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The previous query fetches all annotations that share identical numerical
+feature sets. This is accomplished by using the SQL <cite>group by</cite> statement
+and filtering to including groups with size strictly greater than 1 using
+the SQL <cite>having</cite> statement.</p>
+<p>Note that in the query itself, we query for the <cite>Annotation</cite> ids, not the
+<cite>Annotation</cite> objects themselves as we would normally do. If <cite>pl.Annotation</cite>
+is used as the query argument, then only a single member of the group is
+returned. <cite>group_concat</cite> returns the entire group in the query, rather
+than a single member; however, a SQL literal must be used inside of
+<cite>group_concat</cite>, so we query for the <cite>Annotation</cite> id instead (the <cite>Annotation</cite>
+object can be obtained from the id, anyway).</p>
+<p>So what exactly is the result?:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="c1"># =&gt; 837</span>
+</pre></div>
+</div>
+<p>This means there are 837 nodule annotation groups whose group members have
+identical characteristic feature values. The individual results can be
+inspected:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="c1"># =&gt; (u&#39;6764,6766&#39;,), (u&#39;5781,5782,5937&#39;,)</span>
+</pre></div>
+</div>
+<p>Each result is a 1-tuple whose element is a string of <cite>Annotation</cite> ids,
+separated by commas. We can assert that the feature values are indeed identical
+in a particular group:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+    <span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">feature_vals</span><span class="p">())</span>
+<span class="c1"># =&gt; [1 1 3 3 5 1 1 5 1]</span>
+<span class="c1"># =&gt; [1 1 3 3 5 1 1 5 1]</span>
+</pre></div>
+</div>
+<p>Let’s look at the largest such group:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">group_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">group_sizes</span><span class="p">))</span>
+<span class="c1"># =&gt; 296</span>
+</pre></div>
+</div>
+<p>So, there is a group of annotations of size 296, all having identical
+feature values, and this is the biggest such group. Let’s look at what the
+feature values are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Get the location of the maximum sized group.</span>
+<span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">group_sizes</span><span class="p">)</span>
+
+<span class="c1"># Grab the first id in the maximum sized group, for no particular reason.</span>
+<span class="nb">id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">ann</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+<span class="n">ann</span><span class="o">.</span><span class="n">print_formatted_feature_table</span><span class="p">()</span>
+<span class="c1"># =&gt; Feature              Meaning                    #</span>
+<span class="c1"># =&gt; -                    -                          -</span>
+<span class="c1"># =&gt; Subtlety           | Fairly Subtle            | 3</span>
+<span class="c1"># =&gt; Internalstructure  | Soft Tissue              | 1</span>
+<span class="c1"># =&gt; Calcification      | Absent                   | 6</span>
+<span class="c1"># =&gt; Sphericity         | Round                    | 5</span>
+<span class="c1"># =&gt; Margin             | Sharp                    | 5</span>
+<span class="c1"># =&gt; Lobulation         | No Lobulation            | 1</span>
+<span class="c1"># =&gt; Spiculation        | No Spiculation           | 1</span>
+<span class="c1"># =&gt; Texture            | Solid                    | 5</span>
+<span class="c1"># =&gt; Malignancy         | Moderately Unlikely      | 2</span>
+</pre></div>
+</div>
+<p>There are 296 annotations with values identical to the above.</p>
+<p>We can confirm that the feature values for all these annotations by computing
+the variance of the each feature value computed over all annotations in the
+group:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fetch the feature values for all annotations in the group</span>
+<span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+
+<span class="n">fvals</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="o">*</span><span class="n">all_features</span><span class="p">)</span>\
+          <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Annotation</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span> <span class="n">ids</span> <span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="n">fvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fvals</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">fvals</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="c1"># =&gt; (296, 9)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">fvals</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="c1"># =&gt; [0. 0. 0. 0. 0. 0. 0. 0. 0.]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta information</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation and setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scan.html">The Scan class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="annotation.html">The Annotation class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">Annotation consensus</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced queries</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Full API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scan.html">Scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation.html">Annotation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consensus.html">Annotation Consensus</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="consensus.html"
+                        title="previous chapter">Annotation consensus</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../scan.html"
+                        title="next chapter">Scan</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tuts/advanced-queries.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../scan.html" title="Scan"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="consensus.html" title="Annotation consensus"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pylidc  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Matt Hancock.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>
